@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relief Valve Sizing Calculator — API 520 521 526 | ProcessDesk</title>
+<link rel="canonical" href="https://processdesks.com/fel3_relief_valve.html">
+<meta name="description" content="Free relief valve sizing calculator per API 520 Parts I and II. Vapor, liquid, and two-phase Omega method. Six relief scenarios, ASME VIII accumulation check, API 526 orifice selection.">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ProcessDesk shared nav */
+.pd-nav{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border-bottom:1px solid #e2e6ec;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.pd-nav-inner{max-width:1280px;margin:0 auto;height:54px;display:flex;align-items:center;gap:0;padding:0 1.5rem;}
+.pd-logo{font-family:monospace;font-size:15px;font-weight:600;color:#0f1420;text-decoration:none;letter-spacing:0.3px;margin-right:1.5rem;white-space:nowrap;}
+.pd-logo em{font-style:normal;color:#1a56db;}
+.pd-tools{display:flex;align-items:center;gap:0;overflow-x:auto;flex:1;scrollbar-width:none;}
+.pd-tools::-webkit-scrollbar{display:none;}
+.pd-tool{font-size:11px;color:#5a6070;text-decoration:none;padding:6px 10px;border-radius:5px;white-space:nowrap;transition:all 0.15s;font-weight:500;}
+.pd-tool:hover{color:#1a56db;background:#eef2ff;}
+.pd-tool.active{color:#1a56db;background:#eef2ff;font-weight:600;}
+.pd-home{font-size:11px;color:#fff;background:#1a56db;text-decoration:none;padding:6px 14px;border-radius:5px;white-space:nowrap;font-weight:600;margin-left:auto;flex-shrink:0;transition:background 0.15s;}
+.pd-home:hover{background:#1648c0;}
+body{padding-top:54px;}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0b0d0f;
+  --s1:#111418;
+  --s2:#181c20;
+  --s3:#1e2328;
+  --s4:#252b30;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --border3:rgba(255,255,255,0.22);
+  --text:#ddd8d0;
+  --text2:#7a7670;
+  --text3:#3e3c38;
+  --accent:#e8b44a;
+  --accent2:#c47a20;
+  --accent-bg:rgba(232,180,74,0.08);
+  --red:#e05540;
+  --red-bg:rgba(224,85,64,0.1);
+  --red-text:#f08070;
+  --green:#40b870;
+  --green-bg:rgba(64,184,112,0.1);
+  --green-text:#70d898;
+  --blue:#4a9ee8;
+  --blue-bg:rgba(74,158,232,0.1);
+  --blue-text:#7abef0;
+  --orange:#e87840;
+  --orange-bg:rgba(232,120,64,0.1);
+  --orange-text:#f0a070;
+  --radius:10px;
+  --rsm:5px;
+}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;}
+.page{max-width:1180px;margin:0 auto;padding:0 1.5rem 3rem;}
+
+/* HEADER */
+.hdr{padding:1.75rem 0 1.25rem;margin-bottom:1.75rem;position:relative;}
+.hdr-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;letter-spacing:2px;color:var(--text);}
+.logo em{font-style:normal;color:var(--accent);}
+.logo-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);letter-spacing:0.08em;margin-top:4px;}
+.badge-stack{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.badge{font-size:10px;letter-spacing:0.07em;padding:4px 10px;border-radius:3px;border:0.5px solid;font-family:'JetBrains Mono',monospace;}
+.b-acc{background:var(--accent-bg);color:var(--accent);border-color:var(--accent2);}
+.b-red{background:var(--red-bg);color:var(--red-text);border-color:var(--red);}
+.b-blue{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue);}
+.hdr-line{height:1px;background:linear-gradient(90deg,var(--accent) 0%,var(--accent2) 30%,transparent 70%);margin-top:1.25rem;}
+
+/* CODE BANNER */
+.code-banner{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;}
+.code-pill{font-size:10px;font-family:'JetBrains Mono',monospace;background:var(--s2);border:0.5px solid var(--border2);color:var(--text2);padding:4px 10px;border-radius:20px;letter-spacing:0.04em;}
+.code-pill.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+
+/* GRID */
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;}
+@media(max-width:740px){.col2,.g2,.g3{grid-template-columns:1fr;}}
+
+/* CARDS */
+.card{background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;}
+.card.accent-card{border-color:var(--accent2);background:linear-gradient(135deg,var(--s1) 0%,rgba(232,180,74,0.04) 100%);}
+.ct{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.9rem;display:flex;align-items:center;gap:8px;}
+.ct::after{content:'';flex:1;height:0.5px;background:var(--border);}
+.ct-acc{color:var(--accent);}
+
+/* SCENARIO SELECTOR */
+.scenario-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;}
+@media(max-width:600px){.scenario-grid{grid-template-columns:repeat(2,1fr);}}
+.sc-btn{padding:10px 8px;background:var(--s2);border:0.5px solid var(--border2);border-radius:var(--rsm);cursor:pointer;text-align:center;transition:all 0.15s;font-family:'JetBrains Mono',monospace;}
+.sc-btn:hover{border-color:var(--border3);background:var(--s3);}
+.sc-btn.active{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);}
+.sc-name{font-size:11px;font-weight:500;display:block;margin-bottom:3px;color:var(--text);}
+.sc-btn.active .sc-name{color:var(--accent);}
+.sc-code{font-size:9px;color:var(--text2);letter-spacing:0.04em;}
+
+/* PHASE TOGGLE */
+.tog{display:flex;border:0.5px solid var(--border2);border-radius:var(--rsm);overflow:hidden;margin-bottom:1rem;}
+.tb{flex:1;padding:9px 6px;font-size:11px;font-family:'JetBrains Mono',monospace;background:transparent;border:none;cursor:pointer;color:var(--text2);transition:background 0.15s,color 0.15s;letter-spacing:0.03em;}
+.tb.av{background:var(--accent);color:#000;font-weight:500;}
+
+/* FORM */
+.field{margin-bottom:0.72rem;}
+.lbl{font-size:11px;color:var(--text2);margin-bottom:4px;display:block;letter-spacing:0.03em;}
+.ir{display:flex;gap:6px;align-items:center;}
+.unit{font-size:10px;color:var(--text3);min-width:48px;letter-spacing:0.03em;}
+input,select{background:var(--s3);border:0.5px solid var(--border2);border-radius:var(--rsm);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:7px 10px;width:100%;outline:none;transition:border-color 0.15s;-webkit-appearance:none;}
+input:focus,select:focus{border-color:var(--accent);}
+.ir input,.ir select{flex:1;width:auto;}
+
+/* RUN */
+.run-btn{width:100%;padding:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:600;letter-spacing:3px;text-transform:uppercase;background:var(--accent);color:#000;border:none;border-radius:var(--rsm);cursor:pointer;transition:opacity 0.15s;margin-bottom:1.25rem;}
+.run-btn:hover{opacity:0.88;}
+
+/* ALERTS */
+.alert{border-radius:0 var(--rsm) var(--rsm) 0;padding:9px 13px;font-size:11px;line-height:1.6;margin-bottom:10px;display:none;}
+.alert.show{display:block;}
+.aok {background:var(--green-bg); border-left:3px solid var(--green); color:var(--green-text);}
+.awk {background:var(--orange-bg);border-left:3px solid var(--orange);color:var(--orange-text);}
+.aer {background:var(--red-bg);   border-left:3px solid var(--red);   color:var(--red-text);}
+.ainf{background:var(--blue-bg);  border-left:3px solid var(--blue);  color:var(--blue-text);}
+
+/* PRESSURE STACK */
+.p-stack{width:100%;margin:0.5rem 0 1rem;}
+.p-bar-wrap{position:relative;height:32px;background:var(--s3);border-radius:4px;overflow:visible;margin-bottom:20px;}
+.p-bar-seg{position:absolute;top:0;height:100%;border-radius:3px;transition:width 0.4s;}
+.p-label{position:absolute;bottom:-18px;font-size:9px;color:var(--text2);font-family:'JetBrains Mono',monospace;white-space:nowrap;transform:translateX(-50%);}
+.p-tick{position:absolute;bottom:0;width:1px;height:100%;background:rgba(255,255,255,0.2);}
+
+/* METRICS */
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+@media(max-width:600px){.mg{grid-template-columns:repeat(2,1fr);}}
+.metric{background:var(--s2);border-radius:var(--rsm);padding:0.75rem 1rem;border:0.5px solid var(--border);}
+.ml{font-size:10px;color:var(--text2);margin-bottom:4px;letter-spacing:0.04em;}
+.mv{font-size:20px;font-weight:500;color:var(--text);}
+.mv.acc{color:var(--accent);}
+.mv.gr{color:var(--green-text);}
+.mv.rd{color:var(--red-text);}
+.mv.or{color:var(--orange-text);}
+.mv.bl{color:var(--blue-text);}
+.mu{font-size:10px;color:var(--text3);}
+
+/* ORIFICE SELECTOR */
+.orifice-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:0.5rem 0 1rem;}
+@media(max-width:600px){.orifice-grid{grid-template-columns:repeat(4,1fr);}}
+.ori-cell{padding:8px 4px;text-align:center;background:var(--s3);border:0.5px solid var(--border);border-radius:var(--rsm);font-size:11px;}
+.ori-cell.sel{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);}
+.ori-cell.insuf{background:var(--red-bg);border-color:var(--red);color:var(--red-text);}
+.ori-ltr{font-size:14px;font-weight:500;display:block;margin-bottom:2px;}
+.ori-area{font-size:9px;color:var(--text3);}
+.ori-cell.sel .ori-area,.ori-cell.insuf .ori-area{color:inherit;opacity:0.7;}
+
+/* PRV TYPE */
+.prv-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;}
+.prv-card{padding:10px 12px;background:var(--s2);border:0.5px solid var(--border);border-radius:var(--rsm);}
+.prv-card.rec{border-color:var(--accent);background:var(--accent-bg);}
+.prv-name{font-size:12px;font-weight:500;margin-bottom:4px;}
+.prv-card.rec .prv-name{color:var(--accent);}
+.prv-range{font-size:10px;color:var(--text2);}
+.prv-rec-tag{font-size:9px;background:var(--accent);color:#000;padding:2px 7px;border-radius:2px;margin-top:6px;display:inline-block;font-weight:500;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:11px;min-width:600px;}
+th{text-align:left;padding:7px 10px;border-bottom:0.5px solid var(--border2);color:var(--text2);font-size:10px;letter-spacing:0.06em;background:var(--s2);}
+td{padding:6px 10px;border-bottom:0.5px solid var(--border);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+td.num{text-align:right;}
+td.ok{color:var(--green-text);}
+td.wk{color:var(--orange-text);}
+td.er{color:var(--red-text);}
+tr.sel-row{background:var(--accent-bg);}
+
+/* DIVIDER */
+.divider{font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin:1.75rem 0 1rem;}
+.divider::before,.divider::after{content:'';flex:1;height:0.5px;background:var(--border2);}
+
+.note{font-size:10px;color:var(--text2);line-height:1.7;}
+
+footer{margin-top:2.5rem;padding-top:1rem;border-top:0.5px solid var(--border2);font-size:10px;color:var(--text3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="page">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="logo">CAP<em>CO</em></div>
+      <div class="logo-sub">FEL-3 Relief Valve Design Engine — Pressure-Relieving Device Sizing</div>
+    </div>
+    <div class="badge-stack">
+      <span class="badge b-acc">API 520 PARTS I &amp; II</span>
+      <span class="badge b-red">API 521 / API 526</span>
+      <span class="badge b-blue">ASME SEC. VIII DIV. 1</span>
+    </div>
+  </div>
+  <div class="hdr-line"></div>
+</div>
+
+<div class="code-banner">
+  <span class="code-pill active">API 520 Pt.I — Sizing</span>
+  <span class="code-pill active">API 520 Pt.II — Installation</span>
+  <span class="code-pill active">API 521 — Scenarios</span>
+  <span class="code-pill active">API 526 — Standard Orifices</span>
+  <span class="code-pill active">ASME VIII Div.1 — MAWP</span>
+  <span class="code-pill">NFPA 30 — Fire Case</span>
+</div>
+
+<div class="col2">
+<!-- LEFT -->
+<div>
+
+  <div class="card accent-card">
+    <div class="ct ct-acc">Relief Scenario — Select Governing Case</div>
+    <div class="scenario-grid" id="scenario-grid">
+      <div class="sc-btn active" onclick="setScenario('blocked')" id="sc-blocked">
+        <span class="sc-name">Blocked Outlet</span>
+        <span class="sc-code">API 521 §5.15</span>
+      </div>
+      <div class="sc-btn" onclick="setScenario('fire')" id="sc-fire">
+        <span class="sc-name">Fire Case</span>
+        <span class="sc-code">API 521 §5.16</span>
+      </div>
+      <div class="sc-btn" onclick="setScenario('cv_fail')" id="sc-cv_fail">
+        <span class="sc-name">Control Valve Fail Open</span>
+        <span class="sc-code">API 521 §5.11</span>
+      </div>
+      <div class="sc-btn" onclick="setScenario('thermal')" id="sc-thermal">
+        <span class="sc-name">Thermal Expansion</span>
+        <span class="sc-code">API 521 §5.14</span>
+      </div>
+      <div class="sc-btn" onclick="setScenario('tube_rupture')" id="sc-tube_rupture">
+        <span class="sc-name">Tube Rupture</span>
+        <span class="sc-code">API 521 §5.18</span>
+      </div>
+      <div class="sc-btn" onclick="setScenario('utility')" id="sc-utility">
+        <span class="sc-name">Utility Failure</span>
+        <span class="sc-code">API 521 §5.12</span>
+      </div>
+    </div>
+    <div id="scenario-note" class="note" style="margin-top:4px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Protected Equipment — MAWP Basis</div>
+    <div class="g2">
+      <div class="field">
+        <label class="lbl">MAWP (Maximum Allowable Working Pressure)</label>
+        <div class="ir"><input type="number" id="mawp" value="150" step="1"><span class="unit">psig</span></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Operating pressure</label>
+        <div class="ir"><input type="number" id="op" value="120" step="1"><span class="unit">psig</span></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="field">
+        <label class="lbl">Set pressure (≤ MAWP)</label>
+        <div class="ir"><input type="number" id="pset" value="150" step="1"><span class="unit">psig</span></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Number of PRVs on this vessel</label>
+        <select id="num-prvs">
+          <option value="1" selected>1 PRV — single device</option>
+          <option value="2">2 PRVs — staggered set</option>
+        </select>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="field">
+        <label class="lbl">Back pressure — superimposed</label>
+        <div class="ir"><input type="number" id="bp-super" value="5" step="1"><span class="unit">psig</span></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Back pressure — built-up (est.)</label>
+        <div class="ir"><input type="number" id="bp-buildup" value="8" step="1"><span class="unit">psig</span></div>
+      </div>
+    </div>
+    <!-- Pressure stack visual -->
+    <div class="p-stack" id="p-stack-wrap">
+      <div class="lbl" style="margin-bottom:8px;">Pressure accumulation diagram</div>
+      <div class="p-bar-wrap" id="p-bar-wrap"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Fluid Phase at Relieving Conditions</div>
+    <div class="tog" id="phase-tog">
+      <button class="tb av" id="ph-vap" onclick="setPhase('vapor')">Vapor / Gas</button>
+      <button class="tb" id="ph-liq" onclick="setPhase('liquid')">Liquid</button>
+      <button class="tb" id="ph-2ph" onclick="setPhase('twophase')">Two-Phase</button>
+    </div>
+    <div class="field">
+      <label class="lbl">Fluid / service description</label>
+      <input type="text" id="fluid-name" value="Natural gas — methane rich">
+    </div>
+    <div class="g2">
+      <div class="field">
+        <label class="lbl">Relieving temperature</label>
+        <div class="ir"><input type="number" id="rel-temp" value="200" step="1"><span class="unit">°F</span></div>
+      </div>
+      <div class="field" id="mw-field">
+        <label class="lbl">Molecular weight (vapor)</label>
+        <div class="ir"><input type="number" id="mol-wt" value="18" step="0.1"><span class="unit">g/mol</span></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="field" id="z-field">
+        <label class="lbl">Compressibility factor (Z)</label>
+        <div class="ir"><input type="number" id="z-fac" value="0.92" step="0.01" min="0.1" max="1.5"><span class="unit">—</span></div>
+      </div>
+      <div class="field" id="k-field">
+        <label class="lbl">Specific heat ratio (k = Cp/Cv)</label>
+        <div class="ir"><input type="number" id="k-ratio" value="1.31" step="0.01" min="1.0" max="1.7"><span class="unit">—</span></div>
+      </div>
+    </div>
+    <div class="g2" id="liq-fields" style="display:none;">
+      <div class="field">
+        <label class="lbl">Liquid density</label>
+        <div class="ir"><input type="number" id="liq-rho" value="50" step="0.1"><span class="unit">lb/ft³</span></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Liquid viscosity</label>
+        <div class="ir"><input type="number" id="liq-visc" value="1.0" step="0.1"><span class="unit">cP</span></div>
+      </div>
+    </div>
+    <div class="g2" id="twoph-fields" style="display:none;">
+      <div class="field">
+        <label class="lbl">Vapor quality (x)</label>
+        <div class="ir"><input type="number" id="vap-qual" value="0.15" step="0.01" min="0" max="1"><span class="unit">mass frac</span></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Omega parameter (ω)</label>
+        <div class="ir"><input type="number" id="omega" value="1.5" step="0.1" min="0.1"><span class="unit">—</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- RIGHT -->
+<div>
+
+  <div class="card">
+    <div class="ct">Required Relieving Rate</div>
+    <div class="field">
+      <label class="lbl">Relief load (mass flow)</label>
+      <div class="ir">
+        <input type="number" id="relief-flow" value="5000" step="100">
+        <select id="flow-unit" style="max-width:90px;">
+          <option value="lbhr" selected>lb/hr</option>
+          <option value="kghr">kg/hr</option>
+          <option value="scfm">SCFM</option>
+        </select>
+      </div>
+    </div>
+    <div id="fire-case-section" style="display:none;">
+      <div class="field">
+        <label class="lbl">Wetted surface area (fire case)</label>
+        <div class="ir"><input type="number" id="wetted-area" value="500" step="10"><span class="unit">ft²</span></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Insulation credit factor (F)</label>
+        <select id="fire-f">
+          <option value="1.0" selected>F = 1.0 — bare vessel, no insulation</option>
+          <option value="0.3">F = 0.3 — adequate insulation (API 521)</option>
+          <option value="0.15">F = 0.15 — excellent insulation</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="lbl">Combination correction factor (Kc)</label>
+      <select id="kc-factor">
+        <option value="1.0" selected>Kc = 1.0 — PRV only (no rupture disk)</option>
+        <option value="0.9">Kc = 0.9 — PRV + rupture disk combination</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="lbl">Capacity correction — viscosity (Kv)</label>
+      <div class="ir"><input type="number" id="kv-factor" value="1.0" step="0.01" min="0.1" max="1.0"><span class="unit">— (1.0 typical)</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Inlet Line — 3% ΔP Check (API 520)</div>
+    <div class="g2">
+      <div class="field">
+        <label class="lbl">Inlet line diameter</label>
+        <div class="ir"><input type="number" id="inlet-d" value="3" step="0.5"><span class="unit">in</span></div>
+      </div>
+      <div class="field">
+        <label class="lbl">Inlet line length</label>
+        <div class="ir"><input type="number" id="inlet-len" value="10" step="1"><span class="unit">ft</span></div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:4px;">API 520 Pt.II: inlet ΔP must not exceed 3% of set pressure to prevent valve chatter and instability.</div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Discharge Disposal Route</div>
+    <div class="tog">
+      <button class="tb av" id="disp-atm" onclick="setDisp('atm')">Atmosphere</button>
+      <button class="tb" id="disp-flare" onclick="setDisp('flare')">Flare Header</button>
+      <button class="tb" id="disp-closed" onclick="setDisp('closed')">Closed System</button>
+    </div>
+    <div id="disp-note" class="note"></div>
+  </div>
+
+  <button class="run-btn" onclick="calculate()">▶ SIZE RELIEF VALVE</button>
+
+  <div id="pressure-result" style="display:none;">
+    <div class="card">
+      <div class="ct ct-acc">Pressure Limits — ASME / API Accumulation</div>
+      <div id="alert-pset" class="alert"></div>
+      <div id="alert-acc" class="alert"></div>
+      <div class="mg" id="p-metrics"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- OUTPUTS -->
+<div id="outputs" style="display:none;">
+
+  <div class="divider">Sizing Results — API 520 Part I</div>
+
+  <div class="card accent-card">
+    <div class="ct ct-acc">Required Orifice Area — API 526 Letter Designation</div>
+    <div id="alert-ori" class="alert" style="margin-bottom:1rem;"></div>
+    <div class="g2" style="margin-bottom:1.25rem;">
+      <div>
+        <div class="lbl">Calculated required area (A)</div>
+        <div style="font-size:32px;font-weight:500;color:var(--accent);font-family:'JetBrains Mono',monospace;" id="a-calc">—</div>
+        <div class="mu">in²</div>
+      </div>
+      <div>
+        <div class="lbl">Selected API 526 orifice</div>
+        <div style="font-size:42px;font-weight:500;color:var(--accent);font-family:'Syne',sans-serif;line-height:1;" id="ori-letter">—</div>
+        <div class="mu" id="ori-area-sel" style="margin-top:2px;"></div>
+      </div>
+    </div>
+    <div class="orifice-grid" id="orifice-grid"></div>
+  </div>
+
+  <div class="col2">
+    <div class="card">
+      <div class="ct">PRV Type Recommendation — Back Pressure Analysis</div>
+      <div id="alert-bp" class="alert"></div>
+      <div class="prv-type-grid" id="prv-type-grid"></div>
+      <div class="note" id="prv-note" style="margin-top:8px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="ct">Sizing Intermediate Values</div>
+      <div class="mg" id="sizing-metrics"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ct">Full Calculation Summary</div>
+    <div id="alert-inlet" class="alert"></div>
+    <div id="alert-flow" class="alert"></div>
+    <div class="mg" id="summary-metrics"></div>
+  </div>
+
+  <div class="divider">Scenario Accumulation Matrix — ASME Reference</div>
+  <div class="card">
+    <div class="ct">Allowable Accumulation per API 520 / ASME VIII</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>PRV count</th>
+            <th>Max accumulation</th>
+            <th>Max relieving P (psig)</th>
+            <th>This design</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="acc-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider">Relief Valve Datasheet — FEL-3 Specification</div>
+  <div class="card">
+    <div class="ct">PRV Tag Sheet</div>
+    <table style="min-width:unset;">
+      <tbody id="tag-body"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<footer>
+  <span>CapCo Engineering Platform — FEL-3 Relief Valve Design Engine v1.0</span>
+  <span>API 520 Pts I&amp;II | API 521 | API 526 | ASME Sec. VIII Div. 1</span>
+</footer>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+let scenario='blocked', phase='vapor', dispRoute='atm';
+
+// ── API 526 Standard Orifice Designations ─────────────
+const ORIFICES=[
+  {ltr:'D', area:0.110},
+  {ltr:'E', area:0.196},
+  {ltr:'F', area:0.307},
+  {ltr:'G', area:0.503},
+  {ltr:'H', area:0.785},
+  {ltr:'J', area:1.287},
+  {ltr:'K', area:1.838},
+  {ltr:'L', area:2.853},
+  {ltr:'M', area:3.600},
+  {ltr:'N', area:4.340},
+  {ltr:'P', area:6.380},
+  {ltr:'Q', area:11.050},
+  {ltr:'R', area:16.000},
+  {ltr:'T', area:26.000}
+];
+
+const SCENARIOS={
+  blocked:{name:'Blocked Outlet',note:'Worst-case: largest incoming stream with all outlets blocked. Use max feed rate. API 521 §5.15.'},
+  fire:{name:'Fire Case',note:'Heat input from pool/jet fire. API 521 §5.16: Q = F×C×A_wet^0.82 (bare vessel, adequate drainage assumed). 21% accumulation allowed.'},
+  cv_fail:{name:'Control Valve Fail Open',note:'Size for full open Cv of largest control valve on inlet. Credible if CV can exceed downstream relief capacity.'},
+  thermal:{name:'Thermal Expansion',note:'Liquid-filled system heated by external source (sun, traced lines). Use API 520 liquid sizing equations. Typically small orifice.'},
+  tube_rupture:{name:'Tube Rupture',note:'High-pressure tube ruptures into low-pressure shell. Driving force = HP side upstream pressure. Two-phase or liquid common.'},
+  utility:{name:'Utility Failure',note:'Loss of cooling water, power, or steam causing uncontrolled reaction or heat buildup. Define credible heat release rate.'}
+};
+
+const DISP_NOTES={
+  atm:'Atmospheric discharge acceptable for non-toxic, non-flammable vapors per API 521 §4.4. Consider noise (API 521 §4.2) and reaction forces.',
+  flare:'Flare header requires back pressure analysis. Confirm header capacity at simultaneous relief. Check for liquid slugging.',
+  closed:'Closed (scrubber/absorber) system — total back pressure constraint. Pilot-operated PRV typically required. Validate header hydraulics.'
+};
+
+function setScenario(s){
+  scenario=s;
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sc-'+s).classList.add('active');
+  document.getElementById('scenario-note').textContent=SCENARIOS[s].note;
+  document.getElementById('fire-case-section').style.display=s==='fire'?'':'none';
+  // Fire case: 16% single PRV, 21% multiple — update note
+}
+
+function setPhase(p){
+  phase=p;
+  ['vap','liq','2ph'].forEach(x=>document.getElementById('ph-'+x).className='tb');
+  const ids={vapor:'ph-vap',liquid:'ph-liq',twophase:'ph-2ph'};
+  document.getElementById(ids[p]).className='tb av';
+  document.getElementById('mw-field').style.display=p==='liquid'?'none':'';
+  document.getElementById('z-field').style.display=p==='liquid'?'none':'';
+  document.getElementById('k-field').style.display=p==='liquid'?'none':'';
+  document.getElementById('liq-fields').style.display=p==='liquid'?'':'none';
+  document.getElementById('twoph-fields').style.display=p==='twophase'?'':'none';
+}
+
+function setDisp(d){
+  dispRoute=d;
+  ['atm','flare','closed'].forEach(x=>document.getElementById('disp-'+x).className='tb');
+  document.getElementById('disp-'+d).className='tb av';
+  document.getElementById('disp-note').textContent=DISP_NOTES[d];
+}
+
+// ── Pressure bar diagram ───────────────────────────────
+function drawPressureBar(){
+  const mawp=+document.getElementById('mawp').value;
+  const pset=+document.getElementById('pset').value;
+  const numPRV=+document.getElementById('num-prvs').value===2?2:1;
+  const isFire=scenario==='fire';
+  const maxAcc=isFire?0.21:(numPRV===2?0.16:0.10);
+  const maxAcc3=0.03; // min 3 psi, shown for reference
+  const reliefingP=pset*(1+maxAcc);
+  const scale=mawp*1.25;
+
+  const wrap=document.getElementById('p-bar-wrap');
+  const pcts={
+    op: (+document.getElementById('op').value/scale*100),
+    set: (pset/scale*100),
+    acc: (reliefingP/scale*100),
+    mawp: (mawp/scale*100)
+  };
+
+  wrap.innerHTML=`
+    <div class="p-bar-seg" style="left:0;width:${pcts.op.toFixed(1)}%;background:#3a6080;opacity:0.5;"></div>
+    <div class="p-bar-seg" style="left:0;width:${pcts.mawp.toFixed(1)}%;background:#505840;opacity:0.4;"></div>
+    <div class="p-bar-seg" style="left:0;width:${pcts.set.toFixed(1)}%;background:#e8b44a;opacity:0.3;"></div>
+    <div class="p-bar-seg" style="left:${pcts.set.toFixed(1)}%;width:${(pcts.acc-pcts.set).toFixed(1)}%;background:#e05540;opacity:0.5;"></div>
+    <div class="p-tick" style="left:${pcts.op.toFixed(1)}%"></div>
+    <div class="p-tick" style="left:${pcts.set.toFixed(1)}%"></div>
+    <div class="p-tick" style="left:${pcts.mawp.toFixed(1)}%"></div>
+    <div class="p-label" style="left:${pcts.op.toFixed(1)}%">Op (${document.getElementById('op').value})</div>
+    <div class="p-label" style="left:${pcts.set.toFixed(1)}%">Set (${pset})</div>
+    <div class="p-label" style="left:${pcts.mawp.toFixed(1)}%">MAWP (${mawp})</div>
+    <div class="p-label" style="left:${Math.min(pcts.acc,96).toFixed(1)}%">Relief P (${reliefingP.toFixed(0)})</div>
+  `;
+}
+
+// ── PRV type grid ───────────────────────────────────────
+function drawPRVTypes(bpRatio){
+  const grid=document.getElementById('prv-type-grid');
+  // bpRatio = total back pressure / set pressure
+  const rec=bpRatio<=0.10?'conv':bpRatio<=0.40?'bellows':'pilot';
+  const types=[
+    {id:'conv',name:'Conventional',range:'Back P ≤ 10% Pset',note:'Simplest, lowest cost. Spring-loaded. Sensitive to back pressure.'},
+    {id:'bellows',name:'Balanced Bellows',range:'Back P ≤ 30–40% Pset',note:'Bellows isolates spring from back pressure. Corrosive service OK.'},
+    {id:'pilot',name:'Pilot-Operated',range:'Back P up to 100% Pset',note:'Best seat tightness. Handles high back pressure. Complex maintenance.'}
+  ];
+  grid.innerHTML=types.map(t=>`
+    <div class="prv-card ${t.id===rec?'rec':''}">
+      <div class="prv-name">${t.name}</div>
+      <div class="prv-range">${t.range}</div>
+      <div class="note" style="margin-top:5px;">${t.note}</div>
+      ${t.id===rec?'<div class="prv-rec-tag">▶ RECOMMENDED</div>':''}
+    </div>`).join('');
+  document.getElementById('prv-note').textContent=
+    `Back pressure ratio = ${(bpRatio*100).toFixed(1)}% of set pressure. `+
+    (rec==='conv'?'Conventional PRV acceptable.':rec==='bellows'?'Balanced-bellows required to maintain capacity.':'Pilot-operated required — back pressure exceeds balanced-bellows limit.');
+}
+
+// ── Main calculation ────────────────────────────────────
+function setAlert(id,cls,msg){const e=document.getElementById(id);e.className='alert '+cls+' show';e.textContent=msg;}
+function clrAlert(id){document.getElementById(id).className='alert';}
+
+function getFlowLbHr(){
+  const q=+document.getElementById('relief-flow').value;
+  const u=document.getElementById('flow-unit').value;
+  if(u==='lbhr') return q;
+  if(u==='kghr') return q*2.20462;
+  if(u==='scfm') return q*60*0.0749; // approx for air; good for FEL-3
+  return q;
+}
+
+function calculate(){
+  const mawp=+document.getElementById('mawp').value;
+  const opP=+document.getElementById('op').value;
+  const pset=+document.getElementById('pset').value;
+  const numPRV=document.getElementById('num-prvs').value==='2'?2:1;
+  const bpSuper=+document.getElementById('bp-super').value;
+  const bpBuildup=+document.getElementById('bp-buildup').value;
+  const bpTotal=bpSuper+bpBuildup;
+  const bpRatio=bpTotal/pset;
+  const relTemp=+document.getElementById('rel-temp').value; // °F
+  const relTempR=relTemp+459.67; // Rankine
+  const Mw=+document.getElementById('mol-wt').value;
+  const Z=+document.getElementById('z-fac').value;
+  const k=+document.getElementById('k-ratio').value;
+  const Kc=+document.getElementById('kc-factor').value;
+  const Kv=+document.getElementById('kv-factor').value;
+  const Kd=0.975; // discharge coefficient, API 520 default for vapor
+  const KdL=0.65; // liquid discharge coefficient
+
+  // Accumulation limits per ASME / API 520
+  const isFire=scenario==='fire';
+  const maxAcc=isFire?0.21:(numPRV===2?0.16:0.10);
+  const P1=pset*(1+maxAcc); // relieving pressure (psia) — psig + 14.696
+  const P1_psia=P1+14.696;
+  const P2_psia=(bpSuper)+14.696; // back pressure in psia for correction
+
+  // Pressure limit checks
+  document.getElementById('pressure-result').style.display='';
+  clrAlert('alert-pset'); clrAlert('alert-acc');
+  if(pset>mawp) setAlert('alert-pset','aer',`Set pressure (${pset} psig) EXCEEDS MAWP (${mawp} psig). VIOLATION — set pressure must be ≤ MAWP per ASME VIII UG-134.`);
+  else if(pset<mawp*0.9) setAlert('alert-pset','awk',`Set pressure is ${((1-pset/mawp)*100).toFixed(0)}% below MAWP. Consider setting closer to MAWP to maximize normal operating window.`);
+  else setAlert('alert-pset','aok',`Set pressure = ${pset} psig, MAWP = ${mawp} psig. Compliant with ASME VIII UG-134.`);
+  const acc_pct=((P1-pset)/pset*100);
+  setAlert('alert-acc','ainf',`Relieving pressure = ${P1.toFixed(1)} psig (${acc_pct.toFixed(1)}% accumulation). Allowable: ${(maxAcc*100).toFixed(0)}% for ${isFire?'fire case':numPRV===2?'multiple PRVs':'single PRV'}.`);
+
+  const pMet=[
+    {lbl:'Operating pressure',val:opP.toFixed(0),unit:'psig',cls:''},
+    {lbl:'Set pressure',val:pset.toFixed(0),unit:'psig',cls:'acc'},
+    {lbl:'Max accumulation',val:(maxAcc*100).toFixed(0)+'%',unit:'allowable',cls:''},
+    {lbl:'Relieving pressure',val:P1.toFixed(1),unit:'psig',cls:'or'},
+    {lbl:'Total back pressure',val:bpTotal.toFixed(0),unit:'psig',cls:''},
+    {lbl:'Back pressure ratio',val:(bpRatio*100).toFixed(1)+'%',unit:'of Pset',cls:bpRatio>0.40?'rd':bpRatio>0.10?'or':'gr'},
+  ];
+  document.getElementById('p-metrics').innerHTML=pMet.map(m=>`
+    <div class="metric"><div class="ml">${m.lbl}</div><div class="mv ${m.cls}">${m.val}</div><div class="mu">${m.unit}</div></div>`).join('');
+
+  drawPressureBar();
+  drawPRVTypes(bpRatio);
+
+  // Back pressure correction factors (API 520)
+  let Kb=1.0;
+  if(phase==='vapor'){
+    // Kb for conventional PRV (overpressure 10%)
+    const r_bp=P2_psia/P1_psia;
+    Kb = r_bp>0.5 ? Math.max(0.0, 1.0 - (r_bp-0.5)/0.4) : 1.0;
+    // For bellows / pilot — Kb = 1.0 (no correction)
+    if(bpRatio>0.10) Kb=1.0; // assuming balanced PRV selected
+  } else if(phase==='liquid'){
+    const r_bp=bpBuildup/pset;
+    Kb = r_bp<=0.10 ? 1.0 : Math.max(0.60, 1.0-0.21*(r_bp-0.10)/0.10);
+  }
+
+  // ── VAPOR SIZING (API 520 Pt.I Eq. 1) ──────────────────
+  // A = W / (C * Kd * P1 * Kb * Kc) * sqrt(T*Z/M)
+  // C = 520 * sqrt(k * (2/(k+1))^((k+1)/(k-1)))
+  let A_calc=0, flowLbHr=getFlowLbHr();
+
+  if(scenario==='fire' && phase==='vapor'){
+    // Fire case: Q = F * 21000 * A_wet^0.82 (BTU/hr)
+    const F=+document.getElementById('fire-f').value;
+    const A_wet=+document.getElementById('wetted-area').value;
+    const Q_fire=F*21000*Math.pow(A_wet,0.82); // BTU/hr API 521 Eq 1
+    // Convert heat to mass flow: W = Q / L_vap (need latent heat — use user-supplied flow for FEL-3)
+    // We'll use the user-supplied flow but show the fire heat
+    document.getElementById('relief-flow').value=Math.round(Q_fire/100); // rough: divide by ~100 BTU/lb
+    flowLbHr=+document.getElementById('relief-flow').value;
+    const alertF=`Fire case heat input Q = ${(Q_fire/1e6).toFixed(2)} MMBTU/hr. Verify latent heat of vaporization to convert to mass flow (W = Q/λ). Using user-entered W = ${flowLbHr.toFixed(0)} lb/hr.`;
+    setAlert('alert-flow','ainf',alertF);
+  } else {
+    clrAlert('alert-flow');
+  }
+
+  if(phase==='vapor'){
+    const C_coeff=520*Math.sqrt(k*Math.pow(2/(k+1),(k+1)/(k-1)));
+    // Critical flow check
+    const Pcrit=P1_psia*Math.pow(2/(k+1),(k/(k-1)));
+    const isCritical=P2_psia<=Pcrit;
+    const F2=isCritical?1.0:Math.sqrt(
+      (k/(k-1))*Math.pow(P2_psia/P1_psia,2/k)*(1-Math.pow(P2_psia/P1_psia,(k-1)/k))/
+      (0.5*(1-Math.pow(P2_psia/P1_psia,2)))
+    );
+    A_calc=(flowLbHr)/(C_coeff*Kd*P1_psia*Kb*Kc*Kv)*Math.sqrt(relTempR*Z/Mw);
+
+    const smets=[
+      {lbl:'C coefficient',val:C_coeff.toFixed(1),unit:'—',cls:''},
+      {lbl:'Kd (discharge)',val:Kd.toFixed(3),unit:'—',cls:''},
+      {lbl:'Kb (back press.)',val:Kb.toFixed(3),unit:'—',cls:''},
+      {lbl:'Critical P',val:Pcrit.toFixed(1),unit:'psia',cls:''},
+      {lbl:'Flow regime',val:isCritical?'Critical':'Subcritical',unit:'—',cls:isCritical?'gr':'or'},
+      {lbl:'P1 relieving',val:P1_psia.toFixed(2),unit:'psia',cls:'acc'},
+    ];
+    document.getElementById('sizing-metrics').innerHTML=smets.map(m=>`
+      <div class="metric"><div class="ml">${m.lbl}</div><div class="mv ${m.cls}">${m.val}</div><div class="mu">${m.unit}</div></div>`).join('');
+
+  } else if(phase==='liquid'){
+    // API 520 liquid: A = Q_liq / (38*Kd*Kw*Kc*Kv) * sqrt(G/(P1-P2))
+    // W in lb/hr, convert to gpm: GPM = W / (500 * SG)
+    const rhoLiq=+document.getElementById('liq-rho').value; // lb/ft3
+    const SG=rhoLiq/62.4;
+    const GPM=flowLbHr/(SG*500);
+    const Kw=bpRatio>0.10? Math.max(0.60,1.0-0.18*(bpRatio-0.10)/0.05):1.0;
+    const dP=P1-bpSuper; // differential
+    A_calc=GPM/(38*KdL*Kw*Kc*Kv)*Math.sqrt(SG/dP);
+    const smets=[
+      {lbl:'SG (liquid)',val:SG.toFixed(3),unit:'—',cls:''},
+      {lbl:'Flow (GPM)',val:GPM.toFixed(1),unit:'US gpm',cls:''},
+      {lbl:'Kd liquid',val:KdL.toFixed(3),unit:'—',cls:''},
+      {lbl:'Kw (back P.)',val:Kw.toFixed(3),unit:'—',cls:''},
+      {lbl:'ΔP across PRV',val:dP.toFixed(1),unit:'psi',cls:''},
+      {lbl:'P1 relieving',val:P1_psia.toFixed(2),unit:'psia',cls:'acc'},
+    ];
+    document.getElementById('sizing-metrics').innerHTML=smets.map(m=>`
+      <div class="metric"><div class="ml">${m.lbl}</div><div class="mv ${m.cls}">${m.val}</div><div class="mu">${m.unit}</div></div>`).join('');
+
+  } else {
+    // Two-phase: Omega method (API 520 Appendix D)
+    const x=+document.getElementById('vap-qual').value;
+    const omg=+document.getElementById('omega').value;
+    // Critical pressure ratio eta_c (Omega method)
+    const eta_c=2*omg/(1+2*omg);
+    const P2_ratio=P2_psia/P1_psia;
+    const isCrit=P2_ratio<=eta_c;
+    const eta=isCrit?eta_c:P2_ratio;
+    const G_mass=Math.sqrt(2*144*P1_psia*(1-(eta))/(omg*(eta)))*68.1; // lb/s/ft2 approx
+    A_calc=(flowLbHr/3600)/(Kd*Kc*G_mass)*144; // in²
+    const smets=[
+      {lbl:'Omega (ω)',val:omg.toFixed(2),unit:'—',cls:''},
+      {lbl:'Vapor quality (x)',val:(x*100).toFixed(1)+'%',unit:'—',cls:''},
+      {lbl:'Critical η',val:eta_c.toFixed(4),unit:'P2/P1',cls:''},
+      {lbl:'Flow regime',val:isCrit?'Critical':'Subcritical',unit:'—',cls:isCrit?'gr':'or'},
+      {lbl:'G mass flux',val:G_mass.toFixed(0),unit:'lb/hr·ft²',cls:''},
+      {lbl:'P1 relieving',val:P1_psia.toFixed(2),unit:'psia',cls:'acc'},
+    ];
+    document.getElementById('sizing-metrics').innerHTML=smets.map(m=>`
+      <div class="metric"><div class="ml">${m.lbl}</div><div class="mv ${m.cls}">${m.val}</div><div class="mu">${m.unit}</div></div>`).join('');
+  }
+
+  // Select API 526 orifice
+  const ori=ORIFICES.find(o=>o.area>=A_calc);
+  const grid=document.getElementById('orifice-grid');
+  grid.innerHTML=ORIFICES.map(o=>{
+    const insuf=o.area<A_calc;
+    const isSel=ori&&o.ltr===ori.ltr;
+    return `<div class="ori-cell ${isSel?'sel':insuf?'insuf':''}">
+      <span class="ori-ltr">${o.ltr}</span>
+      <span class="ori-area">${o.area.toFixed(3)} in²</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('a-calc').textContent=A_calc.toFixed(4);
+  if(ori){
+    document.getElementById('ori-letter').textContent=ori.ltr;
+    document.getElementById('ori-area-sel').textContent=`${ori.area.toFixed(3)} in² — oversized by ${((ori.area/A_calc-1)*100).toFixed(1)}%`;
+    setAlert('alert-ori','aok',`Required A = ${A_calc.toFixed(4)} in². Selected: API 526 Letter "${ori.ltr}" (${ori.area.toFixed(3)} in²). Oversized by ${((ori.area/A_calc-1)*100).toFixed(1)}%.`);
+  } else {
+    document.getElementById('ori-letter').textContent='T+';
+    document.getElementById('ori-area-sel').textContent='Exceeds largest standard orifice — multiple PRVs required';
+    setAlert('alert-ori','aer',`Required area ${A_calc.toFixed(4)} in² exceeds max API 526 "T" orifice (26.0 in²). Multiple PRVs in parallel or special design required.`);
+  }
+
+  // Inlet ΔP check (simplified — velocity head estimate)
+  const inletD=+document.getElementById('inlet-d').value; // inches
+  const inletLen=+document.getElementById('inlet-len').value; // ft
+  const A_inlet=Math.PI*(inletD/12)**2/4; // ft²
+  // Velocity estimate for vapor (assuming ideal gas)
+  const rho_v=Mw*P1_psia*144/(1545*relTempR*Z); // lb/ft³
+  const vel=phase==='vapor'?(flowLbHr/3600)/(rho_v*A_inlet):0;
+  const dP_inlet=phase==='vapor'?0.00013*rho_v*vel*vel*(inletLen/(inletD/12))/144:0; // psi
+  const inlet3pct=pset*0.03;
+  clrAlert('alert-inlet');
+  if(phase==='vapor'){
+    if(dP_inlet>inlet3pct) setAlert('alert-inlet','aer',`Estimated inlet ΔP = ${dP_inlet.toFixed(2)} psi EXCEEDS 3% limit (${inlet3pct.toFixed(2)} psi). Risk of valve chatter. Increase inlet line diameter.`);
+    else setAlert('alert-inlet','aok',`Estimated inlet ΔP ≈ ${dP_inlet.toFixed(2)} psi — within 3% rule (limit: ${inlet3pct.toFixed(2)} psi). Inlet line acceptable.`);
+  }
+
+  // Summary metrics
+  const backPressureAlert=bpRatio>0.40?'aer':bpRatio>0.10?'awk':'aok';
+  clrAlert('alert-bp');
+  setAlert('alert-bp',backPressureAlert,
+    `Back pressure = ${bpTotal.toFixed(0)} psig (${(bpRatio*100).toFixed(1)}% of set pressure). `+
+    (bpRatio>0.40?'PILOT-OPERATED PRV required.':bpRatio>0.10?'Balanced-bellows or pilot-operated PRV required.':'Conventional PRV acceptable.'));
+
+  const sumMets=[
+    {lbl:'Scenario',val:SCENARIOS[scenario].name.split(' ').slice(0,2).join(' '),unit:'',cls:'acc'},
+    {lbl:'Phase',val:phase.charAt(0).toUpperCase()+phase.slice(1),unit:'',cls:''},
+    {lbl:'Relief flow',val:(flowLbHr/1000).toFixed(2),unit:'klb/hr',cls:''},
+    {lbl:'Calc. area (A)',val:A_calc.toFixed(4),unit:'in²',cls:''},
+    {lbl:'Selected orifice',val:ori?ori.ltr:'T+',unit:ori?ori.area.toFixed(3)+' in²':'oversized',cls:'acc'},
+    {lbl:'Inlet ΔP est.',val:phase==='vapor'?dP_inlet.toFixed(2):'N/A',unit:'psi',cls:phase==='vapor'?(dP_inlet>inlet3pct?'rd':'gr'):''},
+    {lbl:'PRV type',val:bpRatio>0.40?'Pilot-operated':bpRatio>0.10?'Balanced bellows':'Conventional',unit:'',cls:''},
+    {lbl:'Disposal route',val:dispRoute.charAt(0).toUpperCase()+dispRoute.slice(1),unit:'',cls:''},
+    {lbl:'Kb correction',val:Kb.toFixed(3),unit:'—',cls:''},
+  ];
+  document.getElementById('summary-metrics').innerHTML=sumMets.map(m=>`
+    <div class="metric"><div class="ml">${m.lbl}</div><div class="mv ${m.cls}">${m.val}</div><div class="mu">${m.unit}</div></div>`).join('');
+
+  // Accumulation matrix
+  const accRows=[
+    ['Blocked outlet — single PRV','1','10%',(pset*1.10).toFixed(0),P1.toFixed(1),P1<=(pset*1.10)?'ok':'er'],
+    ['Blocked outlet — 2nd PRV staggered','2','16%',(pset*1.16).toFixed(0),P1.toFixed(1),P1<=(pset*1.16)?'ok':'er'],
+    ['Fire case — any','1 or 2','21%',(pset*1.21).toFixed(0),P1.toFixed(1),P1<=(pset*1.21)?'ok':'er'],
+    ['Supplemental PRV (operating)','2','16%',(pset*1.16).toFixed(0),P1.toFixed(1),P1<=(pset*1.16)?'ok':'er'],
+  ];
+  const statLbl={ok:'Compliant',er:'VIOLATION'};
+  document.getElementById('acc-table-body').innerHTML=accRows.map(r=>`
+    <tr>
+      <td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+      <td class="num">${r[3]}</td><td class="num">${r[4]}</td>
+      <td class="${r[5]}">${statLbl[r[5]]}</td>
+    </tr>`).join('');
+
+  // Tag sheet
+  const tagRows=[
+    ['Tag number','PRV-XXX-001','Service',document.getElementById('fluid-name').value],
+    ['Scenario',SCENARIOS[scenario].name,'Phase',phase.charAt(0).toUpperCase()+phase.slice(1)],
+    ['MAWP',''+mawp+' psig','Set pressure',''+pset+' psig'],
+    ['Relieving pressure',''+P1.toFixed(1)+' psig','Accumulation',(maxAcc*100).toFixed(0)+'%'],
+    ['Relieving temp.',''+relTemp+' °F','Relieving temp. (R)',''+relTempR.toFixed(1)+' °R'],
+    ['Back pressure (super.)',''+bpSuper+' psig','Back pressure (built-up)',''+bpBuildup+' psig'],
+    ['Relief load',''+flowLbHr.toFixed(0)+' lb/hr','Mol. weight',phase!=='liquid'?Mw+' g/mol':'N/A (liquid)'],
+    ['Z factor',phase!=='liquid'?Z.toFixed(3):'N/A','k = Cp/Cv',phase!=='liquid'?k.toFixed(3):'N/A'],
+    ['Kd (discharge)',''+Kd,'Kb (back press.)',''+Kb.toFixed(3)],
+    ['Kc (combination)',''+Kc,'Kv (viscosity)',''+Kv.toFixed(3)],
+    ['Required area (A)',''+A_calc.toFixed(4)+' in²','API 526 orifice',ori?ori.ltr+' ('+ori.area.toFixed(3)+' in²)':'T+ (multi-PRV)'],
+    ['PRV type rec.',bpRatio>0.40?'Pilot-operated':bpRatio>0.10?'Balanced bellows':'Conventional','Disposal route',dispRoute.charAt(0).toUpperCase()+dispRoute.slice(1)],
+    ['Governing code','API 520 Pt.I / ASME VIII','Scenario ref.',SCENARIOS[scenario].note.split('.')[0]],
+  ];
+  document.getElementById('tag-body').innerHTML=tagRows.map(r=>`<tr>
+    <td style="color:var(--text2);font-size:11px;padding:5px 10px;border-bottom:0.5px solid var(--border);white-space:nowrap;">${r[0]}</td>
+    <td style="font-weight:500;font-size:12px;padding:5px 10px;border-bottom:0.5px solid var(--border);">${r[1]}</td>
+    <td style="color:var(--text2);font-size:11px;padding:5px 10px;border-bottom:0.5px solid var(--border);border-left:0.5px solid var(--border);white-space:nowrap;">${r[2]}</td>
+    <td style="font-weight:500;font-size:12px;padding:5px 10px;border-bottom:0.5px solid var(--border);">${r[3]}</td>
+  </tr>`).join('');
+
+  document.getElementById('outputs').style.display='';
+}
+
+// ── Init ────────────────────────────────────────────────
+setScenario('blocked');
+setDisp('atm');
+drawPressureBar();
+document.getElementById('mawp').addEventListener('input',drawPressureBar);
+document.getElementById('pset').addEventListener('input',drawPressureBar);
+document.getElementById('op').addEventListener('input',drawPressureBar);
+document.getElementById('num-prvs').addEventListener('change',drawPressureBar);
+</script>
+</body>
+</html>

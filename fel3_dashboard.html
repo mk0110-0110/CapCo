@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FEL-3 Project Dashboard — Gate Review | ProcessDesk</title>
+<link rel="canonical" href="https://processdesks.com/fel3_dashboard.html">
+<meta name="description" content="Free FEL-3 project gate review dashboard. Traffic light readiness assessment, economics snapshot, CAPEX estimate range, risk register, assumptions table. PDF-ready executive summary.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ProcessDesk shared nav */
+.pd-nav{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border-bottom:1px solid #e2e6ec;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.pd-nav-inner{max-width:1280px;margin:0 auto;height:54px;display:flex;align-items:center;gap:0;padding:0 1.5rem;}
+.pd-logo{font-family:monospace;font-size:15px;font-weight:600;color:#0f1420;text-decoration:none;letter-spacing:0.3px;margin-right:1.5rem;white-space:nowrap;}
+.pd-logo em{font-style:normal;color:#1a56db;}
+.pd-tools{display:flex;align-items:center;gap:0;overflow-x:auto;flex:1;scrollbar-width:none;}
+.pd-tools::-webkit-scrollbar{display:none;}
+.pd-tool{font-size:11px;color:#5a6070;text-decoration:none;padding:6px 10px;border-radius:5px;white-space:nowrap;transition:all 0.15s;font-weight:500;}
+.pd-tool:hover{color:#1a56db;background:#eef2ff;}
+.pd-tool.active{color:#1a56db;background:#eef2ff;font-weight:600;}
+.pd-home{font-size:11px;color:#fff;background:#1a56db;text-decoration:none;padding:6px 14px;border-radius:5px;white-space:nowrap;font-weight:600;margin-left:auto;flex-shrink:0;transition:background 0.15s;}
+.pd-home:hover{background:#1648c0;}
+body{padding-top:54px;}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f9f7f3;
+  --s1:#ffffff;
+  --s2:#f2efe8;
+  --s3:#e8e4db;
+  --border:rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.15);
+  --text:#1a1814;
+  --text2:#6a6560;
+  --text3:#aca89f;
+  --ink:#12100e;
+  --teal:#0a6858;
+  --teal-bg:#e8f4f0;
+  --teal-light:#a0ccc4;
+  --rust:#b84020;
+  --rust-bg:#fdf0eb;
+  --navy:#1a3870;
+  --navy-bg:#eaeffc;
+  --amber:#8c5c10;
+  --amber-bg:#faf0d8;
+  --green:#1a6830;
+  --green-bg:#eaf4ed;
+  --red:#a82020;
+  --red-bg:#faeaea;
+  --gray:#505050;
+  --gray-bg:#f0f0f0;
+  --radius:12px;
+  --rsm:6px;
+}
+
+/* PRINT STYLES */
+@media print{
+  .no-print{display:none!important;}
+  body{background:#fff!important;}
+  .page{max-width:none!important;padding:0 1rem!important;}
+  .card{break-inside:avoid;box-shadow:none!important;border:1px solid #ccc!important;}
+  .section{break-inside:avoid;}
+}
+
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.page{max-width:1200px;margin:0 auto;padding:0 1.5rem 3rem;}
+
+/* TOP BAR */
+.topbar{background:var(--ink);color:#fff;padding:10px 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;letter-spacing:1px;}
+.topbar-logo em{font-style:normal;color:#d4a840;}
+.topbar-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.6);letter-spacing:0.06em;}
+.topbar-actions{display:flex;gap:8px;margin-left:auto;align-items:center;}
+.top-btn{font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 14px;border-radius:3px;border:1px solid rgba(255,255,255,0.25);background:transparent;color:rgba(255,255,255,0.8);cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;white-space:nowrap;}
+.top-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.5);}
+.top-btn.primary{background:#d4a840;color:#000;border-color:#d4a840;font-weight:500;}
+.top-btn.primary:hover{opacity:0.9;}
+
+/* HEADER */
+.hdr{padding:2rem 0 1.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border2);}
+.hdr-grid{display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:start;}
+@media(max-width:700px){.hdr-grid{grid-template-columns:1fr;}}
+.proj-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;}
+.proj-name{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;line-height:1.15;color:var(--ink);}
+.proj-name[contenteditable]:focus{outline:2px solid var(--teal);border-radius:3px;padding:2px 4px;}
+.proj-sub{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2);margin-top:6px;letter-spacing:0.03em;}
+.proj-sub[contenteditable]:focus{outline:2px solid var(--teal);border-radius:3px;}
+.hdr-meta{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+.meta-chip{font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 12px;border-radius:3px;border:1px solid;letter-spacing:0.05em;white-space:nowrap;}
+.mc-fel{background:var(--teal-bg);color:var(--teal);border-color:var(--teal-light);}
+.mc-class{background:var(--amber-bg);color:var(--amber);border-color:#c89840;}
+.mc-date{background:var(--s2);color:var(--text2);border-color:var(--border2);}
+
+/* STAGE GATE */
+.stage-gate{display:flex;gap:0;margin-bottom:1.75rem;border:1px solid var(--border2);border-radius:var(--rsm);overflow:hidden;}
+.sg-step{flex:1;padding:10px 8px;text-align:center;background:var(--s2);border-right:1px solid var(--border);position:relative;}
+.sg-step:last-child{border-right:none;}
+.sg-step.done{background:var(--teal-bg);}
+.sg-step.active{background:var(--teal);color:#fff;}
+.sg-step.active .sg-num{color:#fff;}
+.sg-step.active .sg-name{color:rgba(255,255,255,0.9);}
+.sg-num{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--teal);display:block;}
+.sg-step.done .sg-num{color:var(--teal);}
+.sg-step:not(.done):not(.active) .sg-num{color:var(--text3);}
+.sg-name{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2);letter-spacing:0.05em;display:block;margin-top:2px;}
+.sg-check{position:absolute;top:6px;right:8px;font-size:12px;}
+@media(max-width:600px){.sg-step{padding:8px 4px;}.sg-name{display:none;}}
+
+/* GRID LAYOUTS */
+.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-bottom:1rem;}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-bottom:1rem;}
+.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.75rem;margin-bottom:1rem;}
+@media(max-width:800px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border2);border-radius:var(--radius);padding:1.1rem 1.25rem;margin-bottom:1rem;overflow:hidden;}
+.card.teal-top{border-top:3px solid var(--teal);}
+.card.rust-top{border-top:3px solid var(--rust);}
+.card.navy-top{border-top:3px solid var(--navy);}
+.card.amber-top{border-top:3px solid var(--amber);}
+.section-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:0.9rem;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);padding-bottom:0.6rem;}
+.section-title .sticon{font-size:14px;}
+
+/* KPI BOXES */
+.kpi-box{background:var(--s2);border-radius:var(--rsm);padding:0.85rem 1rem;border:1px solid var(--border);}
+.kpi-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-bottom:3px;letter-spacing:0.04em;}
+.kpi-val{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--ink);line-height:1;}
+.kpi-val[contenteditable]:focus{outline:2px solid var(--teal);border-radius:2px;}
+.kpi-val.pos{color:var(--green);}
+.kpi-val.neg{color:var(--red);}
+.kpi-val.warn{color:var(--amber);}
+.kpi-unit{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* TRAFFIC LIGHTS */
+.tl-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.tl-row:last-child{border-bottom:none;}
+.tl{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
+.tl.green{background:var(--green);}
+.tl.amber{background:var(--amber);}
+.tl.red{background:var(--red);}
+.tl.gray{background:var(--gray);}
+.tl-label{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;flex:1;}
+.tl-note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+.tl-select{font-family:'JetBrains Mono',monospace;font-size:10px;border:1px solid var(--border2);border-radius:3px;padding:2px 4px;background:var(--s2);color:var(--text);cursor:pointer;}
+
+/* ACCURACY BAR */
+.acc-bar-wrap{margin:0.75rem 0;}
+.acc-bar{height:28px;border-radius:4px;background:linear-gradient(90deg,var(--red-bg),var(--amber-bg) 30%,var(--green-bg) 50%,var(--amber-bg) 70%,var(--red-bg));border:1px solid var(--border2);position:relative;display:flex;align-items:center;justify-content:center;}
+.acc-pointer{position:absolute;width:3px;height:36px;background:var(--teal);top:-4px;border-radius:2px;}
+.acc-val{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--ink);z-index:1;}
+.acc-labels{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);margin-top:3px;}
+
+/* PROCESS STREAMS */
+.stream-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);}
+.stream-row:last-child{border-bottom:none;}
+.stream-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sd-feed{background:var(--teal);}
+.sd-prod{background:var(--rust);}
+.sd-util{background:var(--navy);}
+.stream-name{font-family:'JetBrains Mono',monospace;font-size:11px;flex:1;}
+.stream-val{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;}
+.stream-unit{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);}
+
+/* RISK TABLE */
+.risk-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.risk-row:last-child{border-bottom:none;}
+.risk-desc{font-family:'Inter',sans-serif;}
+.risk-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap;}
+.rb-h{background:var(--red-bg);color:var(--red);}
+.rb-m{background:var(--amber-bg);color:var(--amber);}
+.rb-l{background:var(--green-bg);color:var(--green);}
+.risk-action{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2);}
+
+/* MODULE NAV */
+.mod-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+@media(max-width:600px){.mod-grid{grid-template-columns:repeat(2,1fr);}}
+.mod-card{background:var(--s2);border:1px solid var(--border2);border-radius:var(--rsm);padding:0.85rem 1rem;cursor:pointer;transition:all 0.15s;text-decoration:none;display:block;}
+.mod-card:hover{border-color:var(--teal);background:var(--teal-bg);transform:translateY(-1px);}
+.mod-icon{font-size:20px;margin-bottom:5px;display:block;}
+.mod-name{font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.mod-desc{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2);letter-spacing:0.03em;}
+.mod-status{font-family:'JetBrains Mono',monospace;font-size:9px;margin-top:5px;padding:2px 6px;border-radius:2px;display:inline-block;}
+.ms-ready{background:var(--green-bg);color:var(--green);}
+.ms-link{background:var(--teal-bg);color:var(--teal);}
+
+/* ASSUMPTION TABLE */
+.assump-row{padding:6px 0;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;}
+.assump-row:last-child{border-bottom:none;}
+.assump-key{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+.assump-val{font-family:'Inter',sans-serif;font-size:12px;font-weight:500;}
+.assump-val[contenteditable]:focus{outline:2px solid var(--teal);border-radius:2px;padding:1px 3px;}
+.assump-conf{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;border-radius:2px;}
+.ac-h{background:var(--green-bg);color:var(--green);}
+.ac-m{background:var(--amber-bg);color:var(--amber);}
+.ac-l{background:var(--red-bg);color:var(--red);}
+
+/* EDIT TOGGLE */
+.edit-bar{background:var(--amber-bg);border:1px solid #c89840;border-radius:var(--rsm);padding:8px 14px;margin-bottom:1rem;display:none;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);}
+.edit-bar.visible{display:flex;}
+
+/* DIVIDER */
+.divider{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;display:flex;align-items:center;gap:10px;margin:1.75rem 0 1rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border2);}
+
+.note{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);line-height:1.7;}
+[contenteditable]{cursor:text;}
+[contenteditable]:hover{background:rgba(10,104,88,0.04);border-radius:2px;}
+
+footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border2);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar no-print">
+  <div>
+    <div class="topbar-logo">Cap<em>Co</em></div>
+    <div class="topbar-title">FEL-3 Project Dashboard — Engineering Platform</div>
+  </div>
+  <div class="topbar-actions">
+    <button class="top-btn" onclick="toggleEdit()">✏ Edit Mode</button>
+    <button class="top-btn" onclick="window.print()">⎙ Print / PDF</button>
+    <button class="top-btn primary" onclick="scrollToNav()">⊞ Module Suite</button>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- EDIT BAR -->
+<div class="edit-bar" id="edit-bar">
+  ✏ Edit mode active — click any value to modify. Changes are local to this session.
+  <button style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 10px;border:1px solid var(--amber);background:transparent;color:var(--amber);border-radius:3px;cursor:pointer;" onclick="toggleEdit()">Done editing</button>
+</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-grid">
+    <div>
+      <div class="proj-label">Project Summary — FEL-3 Decision Package</div>
+      <div class="proj-name" id="proj-name" contenteditable="false">Methanol-to-Olefins Unit<br><span style="font-size:22px;color:var(--text2);">Greenfield Process Plant</span></div>
+      <div class="proj-sub" id="proj-sub" contenteditable="false">Client: Industrial Chemicals Corp. &nbsp;|&nbsp; Location: US Gulf Coast &nbsp;|&nbsp; Prepared by: CapCo Engineering Platform</div>
+    </div>
+    <div class="hdr-meta">
+      <span class="meta-chip mc-fel">FEL-3 / PRE-FEED</span>
+      <span class="meta-chip mc-class">AACE CLASS 3 · ±30%</span>
+      <span class="meta-chip mc-date" id="date-chip">Issue: March 2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE GATE -->
+<div class="stage-gate">
+  <div class="sg-step done"><span class="sg-num">1</span><span class="sg-name">Identify</span><span class="sg-check">✓</span></div>
+  <div class="sg-step done"><span class="sg-num">2</span><span class="sg-name">Assess</span><span class="sg-check">✓</span></div>
+  <div class="sg-step active"><span class="sg-num">3</span><span class="sg-name">Define ◀ HERE</span></div>
+  <div class="sg-step"><span class="sg-num">4</span><span class="sg-name">Execute</span></div>
+  <div class="sg-step"><span class="sg-num">5</span><span class="sg-name">Operate</span></div>
+</div>
+
+<!-- ── SECTION 1: TRAFFIC LIGHT STATUS ──────────── -->
+<div class="grid-2">
+  <div class="card teal-top">
+    <div class="section-title"><span class="sticon">🚦</span> FEL-3 Readiness — Gate Status</div>
+    <div id="tl-list">
+      <div class="tl-row"><div class="tl green"></div><div class="tl-label">Mass & Energy Balance</div><div class="tl-note">Closed ±1.2% · 5 streams</div><select class="tl-select no-print" onchange="setTL(this,0)"><option>green</option><option>amber</option><option>red</option><option>gray</option></select></div>
+      <div class="tl-row"><div class="tl green"></div><div class="tl-label">Process Flow Diagram (PFD)</div><div class="tl-note">Issued for review</div><select class="tl-select no-print" onchange="setTL(this,1)"><option>green</option><option>amber</option><option>red</option><option>gray</option></select></div>
+      <div class="tl-row"><div class="tl green"></div><div class="tl-label">Equipment Sizing</div><div class="tl-note">All major items sized</div><select class="tl-select no-print" onchange="setTL(this,2)"><option>green</option><option>amber</option><option>red</option><option>gray</option></select></div>
+      <div class="tl-row"><div class="tl amber"></div><div class="tl-label">CAPEX Estimate</div><div class="tl-note">Class 3 · vendor quotes pending</div><select class="tl-select no-print" onchange="setTL(this,3)"><option>green</option><option selected>amber</option><option>red</option><option>gray</option></select></div>
+      <div class="tl-row"><div class="tl green"></div><div class="tl-label">Relief & Safety Review</div><div class="tl-note">PRV sized · HAZOP scheduled</div><select class="tl-select no-print" onchange="setTL(this,4)"><option>green</option><option>amber</option><option>red</option><option>gray</option></select></div>
+      <div class="tl-row"><div class="tl amber"></div><div class="tl-label">Environmental & Permits</div><div class="tl-note">Pre-app meeting completed</div><select class="tl-select no-print" onchange="setTL(this,5)"><option>green</option><option selected>amber</option><option>red</option><option>gray</option></select></div>
+      <div class="tl-row"><div class="tl green"></div><div class="tl-label">Project Economics (DCF)</div><div class="tl-note">NPV positive · IRR > hurdle</div><select class="tl-select no-print" onchange="setTL(this,6)"><option>green</option><option>amber</option><option>red</option><option>gray</option></select></div>
+      <div class="tl-row"><div class="tl red"></div><div class="tl-label">Offtake / Commercial</div><div class="tl-note">MOU in progress — not signed</div><select class="tl-select no-print" onchange="setTL(this,7)"><option>green</option><option>amber</option><option selected>red</option><option>gray</option></select></div>
+    </div>
+  </div>
+
+  <div>
+    <!-- RECOMMENDATION BOX -->
+    <div class="card rust-top" style="margin-bottom:1rem;">
+      <div class="section-title"><span class="sticon">📋</span> Gate Recommendation</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--amber);margin-bottom:6px;" id="gate-rec">CONDITIONAL PROCEED</div>
+      <div class="note" id="gate-note" contenteditable="false">Project meets FEL-3 technical and economic criteria. Recommend proceed to FEED subject to: (1) execution of binding offtake agreement, (2) receipt of ≥3 vendor budget quotations for major equipment, (3) completion of pre-FEED HAZOP. Estimated FEED cost: $2.8M over 8 months.</div>
+    </div>
+    <!-- DECISION OWNER -->
+    <div class="card">
+      <div class="section-title"><span class="sticon">👤</span> Decision Information</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="assump-row" style="grid-template-columns:auto 1fr;">
+          <span class="assump-key">Decision required by</span>
+          <span class="assump-val" contenteditable="false">April 15, 2026</span>
+        </div>
+        <div class="assump-row" style="grid-template-columns:auto 1fr;">
+          <span class="assump-key">FEED budget required</span>
+          <span class="assump-val" contenteditable="false">$2.8M</span>
+        </div>
+        <div class="assump-row" style="grid-template-columns:auto 1fr;">
+          <span class="assump-key">FID target date</span>
+          <span class="assump-val" contenteditable="false">Q1 2027</span>
+        </div>
+        <div class="assump-row" style="grid-template-columns:auto 1fr;border-bottom:none;">
+          <span class="assump-key">Plant start-up target</span>
+          <span class="assump-val" contenteditable="false">Q3 2029</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 2: ECONOMICS SNAPSHOT ────────────── -->
+<div class="divider">Economics Snapshot</div>
+<div class="grid-4" style="margin-bottom:1rem;">
+  <div class="kpi-box">
+    <div class="kpi-lbl">NPV (@ 10% WACC)</div>
+    <div class="kpi-val pos" contenteditable="false">+$148M</div>
+    <div class="kpi-unit">real terms · 20yr life</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-lbl">IRR</div>
+    <div class="kpi-val pos" contenteditable="false">18.4%</div>
+    <div class="kpi-unit">vs WACC 10% hurdle</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-lbl">Simple Payback</div>
+    <div class="kpi-val warn" contenteditable="false">6.2 yrs</div>
+    <div class="kpi-unit">undiscounted</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-lbl">Discounted Payback</div>
+    <div class="kpi-val warn" contenteditable="false">8.9 yrs</div>
+    <div class="kpi-unit">at 10% discount rate</div>
+  </div>
+</div>
+<div class="grid-4" style="margin-bottom:1rem;">
+  <div class="kpi-box">
+    <div class="kpi-lbl">Annual Revenue (SS)</div>
+    <div class="kpi-val" contenteditable="false">$124M</div>
+    <div class="kpi-unit">steady state yr 3+</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-lbl">Annual EBITDA</div>
+    <div class="kpi-val pos" contenteditable="false">$48M</div>
+    <div class="kpi-unit">margin 38.7%</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-lbl">Total OPEX</div>
+    <div class="kpi-val" contenteditable="false">$76M</div>
+    <div class="kpi-unit">per year steady state</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kpi-lbl">Break-even Price</div>
+    <div class="kpi-val warn" contenteditable="false">$610/t</div>
+    <div class="kpi-unit">vs base case $850/t</div>
+  </div>
+</div>
+
+<!-- ── SECTION 3: CAPEX ESTIMATE ─────────────────── -->
+<div class="divider">CAPEX Estimate — AACE Class 3</div>
+<div class="grid-2">
+  <div class="card navy-top">
+    <div class="section-title"><span class="sticon">💰</span> Capital Cost Build-up</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <div class="assump-row"><span class="assump-key">Purchased Equipment Cost (PEC)</span><span class="assump-val" contenteditable="false">$42.1M</span><span class="assump-conf ac-m">AACE 3</span></div>
+      <div class="assump-row"><span class="assump-key">Total Installed Cost (TIC)</span><span class="assump-val" contenteditable="false">$163M</span><span class="assump-conf ac-m">Lang 3.88×</span></div>
+      <div class="assump-row"><span class="assump-key">Engineering & Procurement</span><span class="assump-val" contenteditable="false">$16.3M</span><span class="assump-conf ac-m">10% TIC</span></div>
+      <div class="assump-row"><span class="assump-key">Contingency</span><span class="assump-val" contenteditable="false">$26.9M</span><span class="assump-conf ac-l">15%</span></div>
+      <div class="assump-row"><span class="assump-key">Owner's Costs / OSBL</span><span class="assump-val" contenteditable="false">$16.5M</span><span class="assump-conf ac-m">8%</span></div>
+      <div class="assump-row" style="border-bottom:none;"><span class="assump-key" style="font-weight:600;color:var(--ink);">Total Project Cost (TPC)</span><span class="assump-val" style="font-size:16px;color:var(--navy);font-weight:700;" contenteditable="false">$238M</span><span class="assump-conf ac-m">±30%</span></div>
+    </div>
+  </div>
+  <div class="card navy-top">
+    <div class="section-title"><span class="sticon">📊</span> Estimate Accuracy Range</div>
+    <div style="margin-bottom:1rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;align-items:baseline;">
+        <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--red);">$167M</span>
+        <span style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--navy);">$238M</span>
+        <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--green);">$309M</span>
+      </div>
+      <div class="acc-bar">
+        <div class="acc-pointer" style="left:50%;"></div>
+        <span class="acc-val">Base Estimate</span>
+      </div>
+      <div class="acc-labels"><span>−30% low</span><span>Base · Class 3</span><span>+30% high</span></div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);line-height:1.7;">
+      CEPCI escalation: 567→820 (1.447×)<br>
+      Location: US Gulf Coast (1.00×)<br>
+      Phased CAPEX: 40% Yr0 / 40% Yr1 / 20% Yr2<br>
+      Major equipment: 14 items · 3 quotes pending
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 4: PROCESS METRICS ───────────────── -->
+<div class="divider">Process Metrics — Mass & Energy Balance Summary</div>
+<div class="grid-2">
+  <div class="card teal-top">
+    <div class="section-title"><span class="sticon">⚗</span> Stream Summary</div>
+    <div id="stream-list">
+      <div class="stream-row"><div class="stream-dot sd-feed"></div><span class="stream-name">Methanol Feed</span><span class="stream-val" contenteditable="false">12,500</span><span class="stream-unit">kg/h · 40°C · liquid</span></div>
+      <div class="stream-row"><div class="stream-dot sd-prod"></div><span class="stream-name">Ethylene Product</span><span class="stream-val" contenteditable="false">3,840</span><span class="stream-unit">kg/h · 25°C · vapor</span></div>
+      <div class="stream-row"><div class="stream-dot sd-prod"></div><span class="stream-name">Propylene Product</span><span class="stream-val" contenteditable="false">2,960</span><span class="stream-unit">kg/h · 25°C · vapor</span></div>
+      <div class="stream-row"><div class="stream-dot sd-prod"></div><span class="stream-name">C4+ By-product</span><span class="stream-val" contenteditable="false">1,200</span><span class="stream-unit">kg/h · liquid</span></div>
+      <div class="stream-row"><div class="stream-dot sd-util"></div><span class="stream-name">Steam (HPS)</span><span class="stream-val" contenteditable="false">4,200</span><span class="stream-unit">kg/h · 380°C · 40 bar</span></div>
+      <div class="stream-row" style="border-bottom:none;"><div class="stream-dot sd-util"></div><span class="stream-name">Cooling Water</span><span class="stream-val" contenteditable="false">85,000</span><span class="stream-unit">kg/h · 28°C supply</span></div>
+    </div>
+  </div>
+  <div class="card teal-top">
+    <div class="section-title"><span class="sticon">⚡</span> Energy Balance</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <div class="assump-row"><span class="assump-key">Feed stream enthalpy</span><span class="assump-val" contenteditable="false">4,820 kW</span><span class="assump-conf ac-h">✓</span></div>
+      <div class="assump-row"><span class="assump-key">Product stream enthalpy</span><span class="assump-val" contenteditable="false">3,960 kW</span><span class="assump-conf ac-h">✓</span></div>
+      <div class="assump-row"><span class="assump-key">Reactor heat (ΔHrxn)</span><span class="assump-val" contenteditable="false">−2,840 kW</span><span class="assump-conf ac-m">exo</span></div>
+      <div class="assump-row"><span class="assump-key">Net process duty</span><span class="assump-val" contenteditable="false">18.4 MW</span><span class="assump-conf ac-m">fired</span></div>
+      <div class="assump-row"><span class="assump-key">Utility steam demand</span><span class="assump-val" contenteditable="false">8.4 t/h</span><span class="assump-conf ac-m">est.</span></div>
+      <div class="assump-row"><span class="assump-key">Electricity demand</span><span class="assump-val" contenteditable="false">3.2 MW</span><span class="assump-conf ac-m">est.</span></div>
+      <div class="assump-row" style="border-bottom:none;"><span class="assump-key">Mass balance closure</span><span class="assump-val pos" contenteditable="false">99.2%</span><span class="assump-conf ac-h">✓</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 5: RISK & ASSUMPTIONS ────────────── -->
+<div class="divider">Risk Register & Key Assumptions</div>
+<div class="grid-2">
+  <div class="card amber-top">
+    <div class="section-title"><span class="sticon">⚠</span> Key Risks</div>
+    <div>
+      <div class="risk-row"><span class="risk-desc">Product price below break-even ($610/t)</span><span class="risk-badge rb-h">HIGH</span><span class="risk-action">Offtake agreement</span></div>
+      <div class="risk-row"><span class="risk-desc">CAPEX overrun — vendor quotes pending</span><span class="risk-badge rb-h">HIGH</span><span class="risk-action">Get 3 quotes</span></div>
+      <div class="risk-row"><span class="risk-desc">Catalyst performance below design</span><span class="risk-badge rb-m">MEDIUM</span><span class="risk-action">Vendor guarantee</span></div>
+      <div class="risk-row"><span class="risk-desc">Permitting timeline slippage</span><span class="risk-badge rb-m">MEDIUM</span><span class="risk-action">Pre-app submitted</span></div>
+      <div class="risk-row"><span class="risk-desc">Feedstock (methanol) cost escalation</span><span class="risk-badge rb-m">MEDIUM</span><span class="risk-action">Index-linked contract</span></div>
+      <div class="risk-row"><span class="risk-desc">Skilled labour availability onsite</span><span class="risk-badge rb-l">LOW</span><span class="risk-action">EPC tender Q2</span></div>
+      <div class="risk-row" style="border-bottom:none;"><span class="risk-desc">Utility infrastructure adequacy</span><span class="risk-badge rb-l">LOW</span><span class="risk-action">Site survey done</span></div>
+    </div>
+  </div>
+  <div class="card amber-top">
+    <div class="section-title"><span class="sticon">📌</span> Key Assumptions</div>
+    <div>
+      <div class="assump-row"><span class="assump-key">Plant capacity</span><span class="assump-val" contenteditable="false">120 kt/yr olefins</span><span class="assump-conf ac-h">confirmed</span></div>
+      <div class="assump-row"><span class="assump-key">Ethylene selling price</span><span class="assump-val" contenteditable="false">$850/tonne</span><span class="assump-conf ac-m">Q4 2025 spot</span></div>
+      <div class="assump-row"><span class="assump-key">Methanol feedstock</span><span class="assump-val" contenteditable="false">$320/tonne</span><span class="assump-conf ac-m">market index</span></div>
+      <div class="assump-row"><span class="assump-key">On-stream factor</span><span class="assump-val" contenteditable="false">8,000 hr/yr</span><span class="assump-conf ac-h">91.3%</span></div>
+      <div class="assump-row"><span class="assump-key">Catalyst life</span><span class="assump-val" contenteditable="false">18 months</span><span class="assump-conf ac-m">vendor est.</span></div>
+      <div class="assump-row"><span class="assump-key">Discount rate (WACC)</span><span class="assump-val" contenteditable="false">10%</span><span class="assump-conf ac-h">board approved</span></div>
+      <div class="assump-row"><span class="assump-key">Inflation / escalation</span><span class="assump-val" contenteditable="false">2.5%/yr</span><span class="assump-conf ac-h">CPI basis</span></div>
+      <div class="assump-row" style="border-bottom:none;"><span class="assump-key">Tax rate</span><span class="assump-val" contenteditable="false">25%</span><span class="assump-conf ac-h">US federal</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 6: MODULE NAVIGATOR ───────────────── -->
+<div class="divider" id="module-nav">CapCo FEL-3 Engineering Suite — Module Navigator</div>
+<div class="card" style="padding:1.25rem;">
+  <div class="section-title"><span class="sticon">⊞</span> Engineering Calculation Modules</div>
+  <div class="mod-grid">
+    <a class="mod-card" href="fel3_hydraulics.html">
+      <span class="mod-icon">🌊</span>
+      <div class="mod-name">Liquid Hydraulics</div>
+      <div class="mod-desc">Line sizing · ΔP · pump head</div>
+      <span class="mod-status ms-ready">Darcy-Weisbach / HW</span>
+    </a>
+    <a class="mod-card" href="fel3_gas_hydraulics.html">
+      <span class="mod-icon">💨</span>
+      <div class="mod-name">Gas Hydraulics</div>
+      <div class="mod-desc">Compressible flow · Weymouth · API 14E</div>
+      <span class="mod-status ms-ready">General Flow / Panhandle B</span>
+    </a>
+    <a class="mod-card" href="fel3_heat_exchanger.html">
+      <span class="mod-icon">♨</span>
+      <div class="mod-name">Heat Exchanger Design</div>
+      <div class="mod-desc">TEMA S&T · LMTD · U coefficient</div>
+      <span class="mod-status ms-ready">NTU-Effectiveness</span>
+    </a>
+    <a class="mod-card" href="fel3_relief_valve.html">
+      <span class="mod-icon">🔧</span>
+      <div class="mod-name">Relief Valve Sizing</div>
+      <div class="mod-desc">API 520/521/526 · ASME VIII</div>
+      <span class="mod-status ms-ready">Vapor / Liquid / 2-Phase</span>
+    </a>
+    <a class="mod-card" href="fel3_pump_selection.html">
+      <span class="mod-icon">⚙</span>
+      <div class="mod-name">Pump Selection</div>
+      <div class="mod-desc">H-Q curves · NPSH · Affinity laws</div>
+      <span class="mod-status ms-ready">System curve intersection</span>
+    </a>
+    <a class="mod-card" href="fel3_meb.html">
+      <span class="mod-icon">⚗</span>
+      <div class="mod-name">Mass & Energy Balance</div>
+      <div class="mod-desc">Stream table · Sankey · Closure</div>
+      <span class="mod-status ms-ready">5 process templates</span>
+    </a>
+    <a class="mod-card" href="fel3_economics.html">
+      <span class="mod-icon">📈</span>
+      <div class="mod-name">Project Economics</div>
+      <div class="mod-desc">NPV · IRR · Payback · Tornado</div>
+      <span class="mod-status ms-ready">DCF · Sensitivity</span>
+    </a>
+    <a class="mod-card" href="fel3_cost_estimator.html">
+      <span class="mod-icon">💰</span>
+      <div class="mod-name">Equipment Cost Estimator</div>
+      <div class="mod-desc">Lang/Hand · CEPCI · 6 types</div>
+      <span class="mod-status ms-ready">±30% AACE Class 3</span>
+    </a>
+    <a class="mod-card" href="fel3_dashboard.html" style="border-color:var(--teal);background:var(--teal-bg);">
+      <span class="mod-icon">🗂</span>
+      <div class="mod-name">Project Dashboard</div>
+      <div class="mod-desc">Executive summary · Gate review</div>
+      <span class="mod-status ms-link">← You are here</span>
+    </a>
+  </div>
+  <div class="note" style="margin-top:1rem;">All modules are standalone HTML files — no server, no login, no dependencies. Deploy to any static host or share as a file. Each module produces FEL-3 grade outputs suitable for capital sanction packages.</div>
+</div>
+
+<footer>
+  <span>CapCo Engineering Platform — FEL-3 Project Dashboard v1.0 | Confidential — For Discussion Purposes Only</span>
+  <span id="footer-date">Prepared: March 2026</span>
+</footer>
+</div>
+
+<script>
+// ── TRAFFIC LIGHTS ────────────────────────────────────
+function setTL(sel,idx){
+  const color=sel.value;
+  const rows=document.querySelectorAll('#tl-list .tl-row');
+  const dot=rows[idx].querySelector('.tl');
+  dot.className='tl '+color;
+  updateGateRec();
+}
+
+function updateGateRec(){
+  const dots=[...document.querySelectorAll('#tl-list .tl')];
+  const reds=dots.filter(d=>d.classList.contains('red')).length;
+  const ambers=dots.filter(d=>d.classList.contains('amber')).length;
+  const rec=document.getElementById('gate-rec');
+  if(reds>=2){rec.textContent='DO NOT PROCEED';rec.style.color='var(--red)';}
+  else if(reds===1||ambers>=3){rec.textContent='CONDITIONAL PROCEED';rec.style.color='var(--amber)';}
+  else if(ambers<=2){rec.textContent='RECOMMEND PROCEED';rec.style.color='var(--green)';}
+}
+
+// ── EDIT MODE ─────────────────────────────────────────
+let editMode=false;
+function toggleEdit(){
+  editMode=!editMode;
+  const bar=document.getElementById('edit-bar');
+  bar.classList.toggle('visible',editMode);
+  document.querySelectorAll('[contenteditable]').forEach(el=>{
+    el.contentEditable=editMode?'true':'false';
+  });
+}
+
+// ── SCROLL TO NAV ─────────────────────────────────────
+function scrollToNav(){
+  document.getElementById('module-nav').scrollIntoView({behavior:'smooth'});
+}
+
+// ── SET DATE ──────────────────────────────────────────
+const now=new Date();
+const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const dateStr=`${months[now.getMonth()]} ${now.getFullYear()}`;
+document.getElementById('date-chip').textContent=`Issue: ${dateStr}`;
+document.getElementById('footer-date').textContent=`Prepared: ${dateStr}`;
+</script>
+</body>
+</html>

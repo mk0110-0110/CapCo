@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gas Hydraulics & Line Sizing Calculator — FEL-3 | ProcessDesk</title>
+<link rel="canonical" href="https://processdesks.com/fel3_gas_hydraulics.html">
+<meta name="description" content="Free compressible gas flow calculator. API 14E erosional velocity check, Mach number limit, Weymouth and Panhandle B correlations, compressor sizing. FEL-3 process engineering tool.">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ProcessDesk shared nav */
+.pd-nav{position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(255,255,255,0.97);backdrop-filter:blur(10px);border-bottom:1px solid #e2e6ec;font-family:'Plus Jakarta Sans',sans-serif;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+.pd-nav-inner{max-width:1280px;margin:0 auto;height:54px;display:flex;align-items:center;gap:0;padding:0 1.5rem;}
+.pd-logo{font-family:monospace;font-size:15px;font-weight:600;color:#0f1420;text-decoration:none;letter-spacing:0.3px;margin-right:1.5rem;white-space:nowrap;}
+.pd-logo em{font-style:normal;color:#1a56db;}
+.pd-tools{display:flex;align-items:center;gap:0;overflow-x:auto;flex:1;scrollbar-width:none;}
+.pd-tools::-webkit-scrollbar{display:none;}
+.pd-tool{font-size:11px;color:#5a6070;text-decoration:none;padding:6px 10px;border-radius:5px;white-space:nowrap;transition:all 0.15s;font-weight:500;}
+.pd-tool:hover{color:#1a56db;background:#eef2ff;}
+.pd-tool.active{color:#1a56db;background:#eef2ff;font-weight:600;}
+.pd-home{font-size:11px;color:#fff;background:#1a56db;text-decoration:none;padding:6px 14px;border-radius:5px;white-space:nowrap;font-weight:600;margin-left:auto;flex-shrink:0;transition:background 0.15s;}
+.pd-home:hover{background:#1648c0;}
+body{padding-top:54px;}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0f1012;
+  --surface:#17191c;
+  --surface2:#1e2124;
+  --surface3:#252729;
+  --border:rgba(255,255,255,0.08);
+  --border2:rgba(255,255,255,0.15);
+  --text:#e8e6e0;
+  --text2:#8a8880;
+  --text3:#4a4a48;
+  --accent:#00c2a8;
+  --accent-dim:#007a6a;
+  --accent-bg:rgba(0,194,168,0.08);
+  --amber:#e8a020;
+  --amber-bg:rgba(232,160,32,0.1);
+  --amber-text:#c07818;
+  --red:#e05040;
+  --red-bg:rgba(224,80,64,0.1);
+  --red-text:#c04030;
+  --green:#60c060;
+  --green-bg:rgba(96,192,96,0.1);
+  --green-text:#408040;
+  --radius:8px;
+  --radius-sm:5px;
+}
+
+body{
+  font-family:'Rajdhani',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:0;
+}
+
+.page-wrap{max-width:1140px;margin:0 auto;padding:0 1.5rem 3rem;}
+
+/* HEADER */
+.hdr{
+  padding:1.5rem 0 1rem;
+  margin-bottom:1.5rem;
+  border-bottom:1px solid var(--border2);
+  display:flex;align-items:flex-end;gap:1.25rem;flex-wrap:wrap;
+}
+.hdr-left{display:flex;flex-direction:column;gap:4px;}
+.logo{
+  font-family:'Rajdhani',sans-serif;
+  font-size:26px;font-weight:600;letter-spacing:2px;
+  color:var(--text);
+}
+.logo span{color:var(--accent);}
+.logo-sub{
+  font-family:'Source Code Pro',monospace;
+  font-size:11px;color:var(--text2);letter-spacing:0.1em;
+}
+.badge-row{display:flex;gap:8px;margin-left:auto;align-items:center;}
+.badge{
+  font-family:'Source Code Pro',monospace;font-size:10px;letter-spacing:0.07em;
+  padding:4px 10px;border-radius:3px;
+}
+.badge-teal{background:var(--accent-bg);color:var(--accent);border:0.5px solid var(--accent-dim);}
+.badge-amber{background:var(--amber-bg);color:var(--amber);border:0.5px solid var(--amber-text);}
+
+/* GRID */
+.col-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
+.three-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;}
+@media(max-width:700px){
+  .col-grid,.two-grid,.three-grid{grid-template-columns:1fr;}
+}
+
+/* SECTION CARD */
+.card{
+  background:var(--surface);
+  border:0.5px solid var(--border);
+  border-radius:var(--radius);
+  padding:1rem 1.25rem;
+  margin-bottom:1rem;
+  position:relative;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,var(--accent-dim),transparent);
+  border-radius:var(--radius) var(--radius) 0 0;
+}
+.card-title{
+  font-family:'Source Code Pro',monospace;
+  font-size:10px;font-weight:500;color:var(--text2);
+  letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:0.9rem;display:flex;align-items:center;gap:8px;
+}
+.card-title::after{content:'';flex:1;height:0.5px;background:var(--border);}
+
+/* FORM */
+.field{margin-bottom:0.7rem;}
+.lbl{
+  font-size:12px;color:var(--text2);margin-bottom:4px;display:block;
+  font-family:'Source Code Pro',monospace;
+}
+.input-row{display:flex;gap:6px;align-items:center;}
+.unit{
+  font-size:11px;color:var(--text3);
+  font-family:'Source Code Pro',monospace;min-width:44px;
+}
+
+input[type="text"],input[type="number"],select,textarea{
+  background:var(--surface2);
+  border:0.5px solid var(--border2);
+  border-radius:var(--radius-sm);
+  color:var(--text);
+  font-family:'Source Code Pro',monospace;
+  font-size:13px;
+  padding:7px 10px;
+  width:100%;
+  outline:none;
+  transition:border-color 0.15s,background 0.15s;
+  -webkit-appearance:none;
+}
+input:focus,select:focus{border-color:var(--accent);background:var(--surface3);}
+.input-row input,.input-row select{flex:1;width:auto;}
+
+/* TOGGLE */
+.toggle-row{
+  display:flex;margin-bottom:1rem;
+  border:0.5px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;
+}
+.toggle-btn{
+  flex:1;padding:8px 8px;font-size:11px;
+  font-family:'Source Code Pro',monospace;letter-spacing:0.04em;
+  background:transparent;border:none;cursor:pointer;
+  color:var(--text2);transition:background 0.15s,color 0.15s;
+}
+.toggle-btn.active{background:var(--accent);color:#000;font-weight:500;}
+
+/* RUN BUTTON */
+.run-btn{
+  width:100%;padding:13px;font-size:14px;font-weight:600;
+  font-family:'Rajdhani',sans-serif;letter-spacing:3px;text-transform:uppercase;
+  background:transparent;color:var(--accent);
+  border:1px solid var(--accent);
+  border-radius:var(--radius-sm);cursor:pointer;
+  transition:background 0.15s,color 0.15s;
+  margin-bottom:1.25rem;
+}
+.run-btn:hover{background:var(--accent);color:#000;}
+
+/* METRICS */
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+@media(max-width:600px){.metric-grid{grid-template-columns:repeat(2,1fr);}}
+.metric{
+  background:var(--surface2);
+  border:0.5px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:0.75rem 1rem;
+}
+.metric-lbl{font-size:10px;color:var(--text2);margin-bottom:4px;font-family:'Source Code Pro',monospace;letter-spacing:0.05em;}
+.metric-val{font-size:22px;font-weight:500;font-family:'Source Code Pro',monospace;color:var(--text);}
+.metric-val.accent{color:var(--accent);}
+.metric-val.amber{color:var(--amber);}
+.metric-val.red{color:var(--red);}
+.metric-unit{font-size:10px;color:var(--text3);font-family:'Source Code Pro',monospace;}
+
+/* ALERTS */
+.alert{
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:8px 12px;font-size:12px;
+  font-family:'Source Code Pro',monospace;
+  margin-bottom:10px;line-height:1.5;display:none;
+}
+.alert.visible{display:block;}
+.alert.ok  {background:var(--green-bg);border-left:3px solid var(--green);color:var(--green);}
+.alert.warn{background:var(--amber-bg);border-left:3px solid var(--amber);color:var(--amber);}
+.alert.err {background:var(--red-bg);  border-left:3px solid var(--red);  color:var(--red);}
+
+/* REGIME BAR */
+.regime-bar{
+  height:6px;border-radius:3px;width:100%;margin:6px 0 2px;
+  background:linear-gradient(90deg,#185FA5 0%,#1D9E75 35%,#EF9F27 65%,#e05040 100%);
+  position:relative;
+}
+.regime-marker{
+  position:absolute;top:-5px;width:16px;height:16px;
+  border-radius:50%;border:2px solid var(--surface);
+  background:var(--text);transform:translateX(-50%);transition:left 0.4s;
+}
+.regime-labels{
+  display:flex;justify-content:space-between;
+  font-size:9px;color:var(--text3);
+  font-family:'Source Code Pro',monospace;margin-top:2px;
+}
+.regime-name{font-size:14px;font-weight:600;font-family:'Rajdhani',sans-serif;margin-bottom:2px;}
+
+/* MACH BAR */
+.mach-bar-wrap{margin:6px 0 4px;}
+.mach-track{
+  height:6px;border-radius:3px;
+  background:var(--surface3);
+  position:relative;overflow:hidden;
+}
+.mach-fill{
+  height:100%;border-radius:3px;
+  transition:width 0.4s,background 0.4s;
+}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;}
+table{
+  width:100%;border-collapse:collapse;
+  font-size:12px;font-family:'Source Code Pro',monospace;min-width:780px;
+}
+th{
+  text-align:left;padding:7px 10px;font-weight:500;
+  border-bottom:0.5px solid var(--border2);
+  color:var(--text2);font-size:10px;letter-spacing:0.05em;
+  background:var(--surface2);
+}
+td{padding:6px 10px;border-bottom:0.5px solid var(--border);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+td.num{text-align:right;}
+td.ok  {color:var(--green);}
+td.warn{color:var(--amber);}
+td.err {color:var(--red);}
+tr.selected{background:rgba(0,194,168,0.06);}
+
+/* DIVIDER */
+.section-divider{
+  font-family:'Source Code Pro',monospace;font-size:10px;
+  color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;margin:1.5rem 0 1rem;
+}
+.section-divider::before,.section-divider::after{
+  content:'';flex:1;height:0.5px;background:var(--border);
+}
+
+.note{font-size:11px;color:var(--text2);font-family:'Source Code Pro',monospace;line-height:1.6;}
+
+footer{
+  margin-top:2.5rem;padding-top:1rem;
+  border-top:0.5px solid var(--border);
+  font-size:10px;color:var(--text3);
+  font-family:'Source Code Pro',monospace;letter-spacing:0.05em;
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-left">
+      <div class="logo">CAP<span>CO</span></div>
+      <div class="logo-sub">FEL-3 Gas Hydraulics &amp; Line Sizing Engine — Compressible Flow Systems</div>
+    </div>
+    <div class="badge-row">
+      <span class="badge badge-teal">FEL-3 / AACE CLASS 3</span>
+      <span class="badge badge-amber">GAS / COMPRESSIBLE</span>
+    </div>
+  </div>
+
+  <div class="col-grid">
+    <!-- LEFT -->
+    <div>
+      <div class="card">
+        <div class="card-title">Gas Composition &amp; Properties</div>
+        <div class="field">
+          <label class="lbl">Gas description</label>
+          <input type="text" id="gas-name" value="Natural Gas (Methane-rich)">
+        </div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Specific gravity (rel. air)</label>
+            <div class="input-row">
+              <input type="number" id="sg" value="0.65" step="0.01" min="0.3" max="3.0">
+              <span class="unit">—</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Molecular weight</label>
+            <div class="input-row">
+              <input type="number" id="mw" value="18.8" step="0.1" min="2">
+              <span class="unit">g/mol</span>
+            </div>
+          </div>
+        </div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Dynamic viscosity (μ)</label>
+            <div class="input-row">
+              <input type="number" id="visc" value="0.011" step="0.001" min="0.001">
+              <span class="unit">cP</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Cp/Cv ratio (γ)</label>
+            <div class="input-row">
+              <input type="number" id="gamma" value="1.31" step="0.01" min="1.0" max="1.7">
+              <span class="unit">—</span>
+            </div>
+          </div>
+        </div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Compressibility Z (inlet)</label>
+            <div class="input-row">
+              <input type="number" id="z-factor" value="0.88" step="0.01" min="0.1" max="1.5">
+              <span class="unit">—</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Avg. gas temperature</label>
+            <div class="input-row">
+              <input type="number" id="temp" value="15" step="1">
+              <span class="unit">°C</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Flow Conditions</div>
+        <div class="field">
+          <label class="lbl">Volumetric flow rate (standard conditions)</label>
+          <div class="input-row">
+            <input type="number" id="flow-rate" value="10000" step="100">
+            <select id="flow-unit" style="max-width:110px;">
+              <option value="sm3h">Sm³/h</option>
+              <option value="mmscfd">MMSCFD</option>
+              <option value="mscfd">MSCFD</option>
+            </select>
+          </div>
+        </div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Inlet pressure (P₁)</label>
+            <div class="input-row">
+              <input type="number" id="p1" value="70" step="1">
+              <span class="unit">barg</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Outlet pressure (P₂)</label>
+            <div class="input-row">
+              <input type="number" id="p2" value="65" step="1">
+              <span class="unit">barg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pipe Specification</div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Pipe schedule</label>
+            <select id="pipe-sched">
+              <option value="40">Sch 40</option>
+              <option value="80">Sch 80</option>
+              <option value="10">Sch 10</option>
+              <option value="xs">XS</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="lbl">Nominal diameter (NPS)</label>
+            <select id="pipe-nps">
+              <option value="2">2"</option>
+              <option value="3">3"</option>
+              <option value="4">4"</option>
+              <option value="6" selected>6"</option>
+              <option value="8">8"</option>
+              <option value="10">10"</option>
+              <option value="12">12"</option>
+              <option value="16">16"</option>
+              <option value="20">20"</option>
+              <option value="24">24"</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Pipe material / roughness</label>
+          <select id="roughness">
+            <option value="0.046">Carbon steel — commercial (0.046 mm)</option>
+            <option value="0.0015">Stainless steel — drawn (0.0015 mm)</option>
+            <option value="0.15">Galvanized steel (0.15 mm)</option>
+            <option value="0.026">API 5L line pipe (0.026 mm)</option>
+          </select>
+        </div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Pipe length</label>
+            <div class="input-row">
+              <input type="number" id="pipe-len" value="5000" step="100">
+              <span class="unit">m</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Equiv. length (fittings)</label>
+            <div class="input-row">
+              <input type="number" id="eq-len" value="200" step="10">
+              <span class="unit">m</span>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="lbl">Elevation change (+ = flow uphill)</label>
+          <div class="input-row">
+            <input type="number" id="elevation" value="0" step="1">
+            <span class="unit">m</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div>
+      <div class="card">
+        <div class="card-title">Flow Correlation</div>
+        <div class="toggle-row">
+          <button class="toggle-btn active" id="btn-gfe" onclick="setMethod('gfe')">General Flow Eq.</button>
+          <button class="toggle-btn" id="btn-wey" onclick="setMethod('wey')">Weymouth</button>
+          <button class="toggle-btn" id="btn-pan" onclick="setMethod('pan')">Panhandle B</button>
+        </div>
+        <div id="note-gfe" class="note">
+          General Flow Equation with Colebrook-White friction factor. Rigorous for all Re. Preferred for plant piping and short-medium pipelines.
+        </div>
+        <div id="note-wey" class="note" style="display:none;">
+          Weymouth equation — assumes fully turbulent flow (f ∝ D⁻¹/³). Conservative for large-diameter high-flow transmission lines. Overestimates ΔP at lower flow.
+        </div>
+        <div id="note-pan" class="note" style="display:none;">
+          Panhandle B — empirical, calibrated for long-distance interstate gas pipelines. Efficiency factor E defaults to 0.92 (clean pipe). Less accurate for plant or short lines.
+        </div>
+        <div id="pan-e-row" class="field" style="display:none;margin-top:0.75rem;">
+          <label class="lbl">Panhandle B pipeline efficiency (E)</label>
+          <div class="input-row">
+            <input type="number" id="pan-e" value="0.92" step="0.01" min="0.5" max="1.0">
+            <span class="unit">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">API 14E Erosional Velocity Check</div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">API 14E C factor</label>
+            <div class="input-row">
+              <input type="number" id="c-factor" value="100" step="5" min="50" max="200">
+              <span class="unit">—</span>
+            </div>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end;">
+            <p class="note" style="margin-bottom:7px;">C=100 (continuous), C=125 (intermittent), C=150–200 (solids-free)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Compressor Parameters</div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Compressor efficiency (η_p)</label>
+            <div class="input-row">
+              <input type="number" id="comp-eff" value="78" step="1" min="30" max="95">
+              <span class="unit">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Driver efficiency (η_d)</label>
+            <div class="input-row">
+              <input type="number" id="drv-eff" value="94" step="1" min="50" max="99">
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="two-grid">
+          <div class="field">
+            <label class="lbl">Design margin</label>
+            <div class="input-row">
+              <input type="number" id="margin" value="10" step="5" min="0" max="30">
+              <span class="unit">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="lbl">Number of stages</label>
+            <div class="input-row">
+              <input type="number" id="stages" value="1" step="1" min="1" max="6">
+              <span class="unit">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="run-btn" onclick="calculate()">▶ RUN GAS HYDRAULICS</button>
+
+      <div id="result-area" style="display:none;">
+        <div class="card">
+          <div class="card-title">Flow Regime &amp; Mach Check</div>
+          <div id="regime-name" class="regime-name">—</div>
+          <div class="note" id="re-display" style="margin-bottom:8px;">Re = —</div>
+          <div class="regime-bar"><div class="regime-marker" id="regime-marker" style="left:50%"></div></div>
+          <div class="regime-labels"><span>Laminar</span><span>Transitional</span><span>Turbulent</span></div>
+
+          <div style="margin-top:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
+              <span class="note">Mach number</span>
+              <span class="note" id="mach-display">Ma = —</span>
+            </div>
+            <div class="mach-bar-wrap">
+              <div class="mach-track">
+                <div class="mach-fill" id="mach-fill" style="width:0%;background:var(--green);"></div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:2px;">
+              <span style="font-size:9px;color:var(--text3);font-family:'Source Code Pro',monospace;">0</span>
+              <span style="font-size:9px;color:var(--amber);font-family:'Source Code Pro',monospace;">0.3 (design limit)</span>
+              <span style="font-size:9px;color:var(--red);font-family:'Source Code Pro',monospace;">1.0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OUTPUTS -->
+  <div id="metrics-area" style="display:none;">
+
+    <div class="section-divider">Pressure Drop &amp; Line Sizing Results</div>
+
+    <div class="card">
+      <div class="card-title">Key Outputs</div>
+      <div id="alert-vel"  class="alert"></div>
+      <div id="alert-mach" class="alert"></div>
+      <div id="alert-dp"   class="alert"></div>
+      <div class="metric-grid">
+        <div class="metric"><div class="metric-lbl">Actual velocity (avg)</div><div class="metric-val accent" id="m-vel">—</div><div class="metric-unit">m/s</div></div>
+        <div class="metric"><div class="metric-lbl">Erosional velocity</div><div class="metric-val" id="m-ve">—</div><div class="metric-unit">m/s</div></div>
+        <div class="metric"><div class="metric-lbl">Vel / Ve ratio</div><div class="metric-val" id="m-veratio">—</div><div class="metric-unit">— (limit ≤ 1.0)</div></div>
+        <div class="metric"><div class="metric-lbl">ΔP friction</div><div class="metric-val" id="m-dpf">—</div><div class="metric-unit">bar</div></div>
+        <div class="metric"><div class="metric-lbl">ΔP elevation</div><div class="metric-val" id="m-dpe">—</div><div class="metric-unit">bar</div></div>
+        <div class="metric"><div class="metric-lbl">Total ΔP</div><div class="metric-val amber" id="m-dpt">—</div><div class="metric-unit">bar</div></div>
+        <div class="metric"><div class="metric-lbl">Outlet pressure calc.</div><div class="metric-val" id="m-p2calc">—</div><div class="metric-unit">barg</div></div>
+        <div class="metric"><div class="metric-lbl">ΔP / 100 m</div><div class="metric-val" id="m-dpunit">—</div><div class="metric-unit">mbar/100m</div></div>
+        <div class="metric"><div class="metric-lbl">Friction factor (f)</div><div class="metric-val" id="m-ff">—</div><div class="metric-unit">Darcy</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Compressor Sizing Summary</div>
+      <div class="metric-grid">
+        <div class="metric"><div class="metric-lbl">Compression ratio (r)</div><div class="metric-val" id="m-cr">—</div><div class="metric-unit">P₂/P₁ abs</div></div>
+        <div class="metric"><div class="metric-lbl">Polytropic head</div><div class="metric-val accent" id="m-hp">—</div><div class="metric-unit">kJ/kg</div></div>
+        <div class="metric"><div class="metric-lbl">Gas power (adiabatic)</div><div class="metric-val" id="m-pgas">—</div><div class="metric-unit">kW</div></div>
+        <div class="metric"><div class="metric-lbl">Shaft power (BHP)</div><div class="metric-val" id="m-pshaft">—</div><div class="metric-unit">kW</div></div>
+        <div class="metric"><div class="metric-lbl">Driver power (installed)</div><div class="metric-val" id="m-pdrv">—</div><div class="metric-unit">kW</div></div>
+        <div class="metric"><div class="metric-lbl">Spec driver size</div><div class="metric-val amber" id="m-drvspec">—</div><div class="metric-unit">kW (std frame)</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Diameter Sensitivity — Optimal Line Size Selection</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>NPS</th><th>ID (mm)</th><th>Vel (m/s)</th><th>Ve (m/s)</th>
+              <th>V/Ve</th><th>Ma</th><th>Re</th><th>f</th>
+              <th>ΔP fric (bar)</th><th>Driver (kW)</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="sens-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>CapCo Engineering Platform — FEL-3 Gas Hydraulics &amp; Line Sizing Engine v1.0</span>
+    <span>AACE Class 3 | Compressible Flow | General Flow Eq. / Weymouth / Panhandle B</span>
+  </footer>
+
+</div>
+
+<script>
+let method = 'gfe';
+
+const PIPE_DATA = {
+  '40':  {'2':52.5,'3':77.9,'4':102.3,'6':154.1,'8':202.7,'10':254.5,'12':303.2,'16':381.0,'20':477.8,'24':574.6},
+  '80':  {'2':49.3,'3':73.7,'4':97.2, '6':146.3,'8':193.7,'10':244.5,'12':290.4,'16':363.6,'20':455.0,'24':546.2},
+  '10':  {'2':54.8,'3':80.9,'4':107.1,'6':162.7,'8':213.3,'10':266.2,'12':317.5,'16':398.5,'20':498.3,'24':598.0},
+  'xs':  {'2':49.3,'3':73.7,'4':97.2, '6':146.3,'8':193.7,'10':244.5,'12':290.4,'16':363.6,'20':455.0,'24':546.2}
+};
+const NPS_LIST = ['2','3','4','6','8','10','12','16','20','24'];
+const NPS_LABEL = {'2':'2"','3':'3"','4':'4"','6':'6"','8':'8"','10':'10"','12':'12"','16':'16"','20':'20"','24':'24"'};
+
+const Rg = 8314; // J/(kmol·K)
+const Patm = 1.01325; // bar abs at standard conditions
+const Tstd = 288.15; // K standard temp (15°C)
+
+function setMethod(m) {
+  method = m;
+  ['gfe','wey','pan'].forEach(k => {
+    document.getElementById('btn-'+k).classList.toggle('active', k===m);
+    document.getElementById('note-'+k).style.display = k===m ? '' : 'none';
+  });
+  document.getElementById('pan-e-row').style.display = m==='pan' ? '' : 'none';
+}
+
+function getFlowSm3s() {
+  const q = parseFloat(document.getElementById('flow-rate').value);
+  const u = document.getElementById('flow-unit').value;
+  if(u==='sm3h')   return q/3600;
+  if(u==='mmscfd') return q*1e6*0.0283168/86400;
+  if(u==='mscfd')  return q*1e3*0.0283168/86400;
+  return q/3600;
+}
+
+function colebrook(Re, eps_D) {
+  if(Re < 1) return 64;
+  if(Re < 2300) return 64/Re;
+  let f = 0.02;
+  for(let i=0;i<60;i++){
+    const t = eps_D/3.7 + 2.51/(Re*Math.sqrt(f));
+    if(t<=0) break;
+    const fn = 1/(-2*Math.log10(t))**2;
+    if(Math.abs(fn-f)<1e-10){f=fn;break;}
+    f=fn;
+  }
+  return f;
+}
+
+function weymouthF(D) {
+  // f = 0.032 / D^(1/3)  (D in m, returns Darcy f)
+  return 0.032 / Math.pow(D, 1/3);
+}
+
+function calcHydraulics(nps, sched, Qstd_m3s, sg, mw_kgkmol, mu_cP,
+    Z, T_C, P1_barg, P2_barg, eps_mm, L, Leq, dz,
+    gamma, cFactor, compEff, drvEff, margin, stages, panE) {
+
+  const D = PIPE_DATA[sched][nps] / 1000; // m
+  const A = Math.PI * D * D / 4;
+  const T_K = T_C + 273.15;
+  const P1_abs = P1_barg + Patm; // bar abs
+  const P2_abs = P2_barg + Patm;
+  const Pmean_abs = (P1_abs + P2_abs) / 2;
+
+  // Gas density at mean conditions (real gas)
+  const R_spec = Rg / mw_kgkmol; // J/(kg·K)
+  const rho_mean = Pmean_abs * 1e5 / (Z * R_spec * T_K); // kg/m³
+  const rho_std  = Patm * 1e5 / (1.0 * R_spec * Tstd);   // kg/m³ at std cond
+
+  // Actual volumetric flow at mean conditions
+  const Qact_m3s = Qstd_m3s * (rho_std / rho_mean);
+  const V = Qact_m3s / A; // m/s
+
+  // Speed of sound and Mach
+  const Vs = Math.sqrt(gamma * Z * R_spec * T_K); // m/s
+  const Ma = V / Vs;
+
+  // Reynolds number
+  const mu = mu_cP * 1e-3;
+  const Re = rho_mean * V * D / mu;
+  const eps_D = (eps_mm / 1000) / D;
+
+  // Friction factor
+  let f_val;
+  if(method === 'wey') {
+    f_val = weymouthF(D);
+  } else {
+    f_val = colebrook(Re, eps_D);
+  }
+
+  // Pressure drop calc
+  let dPf_bar;
+  const Ltot = L + Leq;
+
+  if(method === 'gfe' || method === 'wey') {
+    // Darcy-Weisbach for compressible (isothermal approx, moderate ΔP)
+    const dPf_Pa = f_val * Ltot / D * 0.5 * rho_mean * V * V;
+    dPf_bar = dPf_Pa / 1e5;
+  } else {
+    // Panhandle B
+    // Q_MMSCFD
+    const Q_mmscfd = Qstd_m3s * 86400 / (1e6 * 0.0283168);
+    const D_in = (PIPE_DATA[sched][nps]) / 25.4;
+    const P1_psia = P1_abs * 14.5038;
+    const P2_psia = P2_abs * 14.5038;
+    const L_miles = Ltot / 1609.34;
+    const T_R = T_K * 1.8;
+    // Panhandle B: Q = 737 * E * (Tb/Pb) * [(P1²-P2²) / (SG^0.961 * T * L * Z)]^0.51 * D^2.53
+    // Rearrange for dP
+    const Pb = 14.696; const Tb = 519.67;
+    const lhs = Math.pow(Q_mmscfd / (737 * panE * (Tb/Pb) * Math.pow(D_in,2.53)), 1/0.51);
+    const P2sq = P1_psia*P1_psia - lhs * Math.pow(sg,0.961) * T_R * L_miles * Z;
+    const P2_calc_psia = Math.sqrt(Math.max(P2sq, 0));
+    dPf_bar = (P1_psia - P2_calc_psia) / 14.5038;
+  }
+
+  // Elevation pressure term
+  const dPe_bar = rho_mean * 9.81 * dz / 1e5;
+  const dPt_bar = dPf_bar + dPe_bar;
+  const P2_calc = P1_abs - dPt_bar;
+
+  // Erosional velocity (API 14E)
+  const Ve = cFactor / Math.sqrt(rho_mean);
+
+  // Compressor sizing (to make up ΔP)
+  const cr = P2_abs / P1_abs; // compression ratio (suction to discharge)
+  // If ΔP > 0 (need compression), suction = P2_calc, discharge = P2_abs
+  const P_suc = Math.max(P2_calc, 0.1);
+  const P_dis = P2_abs;
+  const cr_comp = P_dis / P_suc;
+
+  // Polytropic head (kJ/kg)
+  const n_poly = gamma; // simplification: polytropic index ≈ γ for initial sizing
+  const Hp = (n_poly / (n_poly - 1)) * Z * R_spec / 1000 * T_K *
+              (Math.pow(cr_comp, (n_poly-1)/n_poly) - 1);
+
+  // Mass flow
+  const mdot = Qstd_m3s * rho_std; // kg/s
+
+  const P_gas = mdot * Hp; // kW
+  const P_shaft = P_gas / (compEff / 100);
+  const P_driver = P_shaft / (drvEff / 100) * (1 + margin/100);
+
+  const STD=[18,22,30,37,45,55,75,90,110,132,160,185,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6300,8000,10000];
+  const drvSpec = STD.find(s => s >= P_driver) || P_driver;
+
+  return {
+    D_mm: PIPE_DATA[sched][nps], D, A, V, Ma, Vs, Re, f: f_val,
+    rho_mean, dPf: dPf_bar, dPe: dPe_bar, dPt: dPt_bar,
+    P2_calc: P2_calc - Patm,
+    dP_per_100: dPf_bar / Ltot * 100 * 1000, // mbar/100m
+    Ve, cr: cr_comp, Hp, P_gas, P_shaft, P_driver, drvSpec
+  };
+}
+
+function regimeLabel(Re) {
+  if(Re<2300)  return {name:'Laminar',       pos:5,  color:'#185FA5'};
+  if(Re<4000)  return {name:'Transitional',  pos:40, color:'#EF9F27'};
+  if(Re<1e5)   return {name:'Turbulent (developing)', pos:65, color:'#1D9E75'};
+  return              {name:'Fully turbulent', pos:90, color:'#00c2a8'};
+}
+
+function setAlert(id, cls, msg) {
+  const el = document.getElementById(id);
+  el.className = 'alert ' + cls + ' visible';
+  el.textContent = msg;
+}
+function clearAlert(id) {
+  document.getElementById(id).className = 'alert';
+}
+
+function calculate() {
+  const Qstd = getFlowSm3s();
+  const sg    = parseFloat(document.getElementById('sg').value);
+  const mw    = parseFloat(document.getElementById('mw').value);
+  const mu    = parseFloat(document.getElementById('visc').value);
+  const Z     = parseFloat(document.getElementById('z-factor').value);
+  const T     = parseFloat(document.getElementById('temp').value);
+  const P1    = parseFloat(document.getElementById('p1').value);
+  const P2    = parseFloat(document.getElementById('p2').value);
+  const eps   = parseFloat(document.getElementById('roughness').value);
+  const L     = parseFloat(document.getElementById('pipe-len').value);
+  const Leq   = parseFloat(document.getElementById('eq-len').value);
+  const dz    = parseFloat(document.getElementById('elevation').value);
+  const sched = document.getElementById('pipe-sched').value;
+  const nps   = document.getElementById('pipe-nps').value;
+  const gamma = parseFloat(document.getElementById('gamma').value);
+  const cFac  = parseFloat(document.getElementById('c-factor').value);
+  const cEff  = parseFloat(document.getElementById('comp-eff').value);
+  const dEff  = parseFloat(document.getElementById('drv-eff').value);
+  const marg  = parseFloat(document.getElementById('margin').value);
+  const stg   = parseFloat(document.getElementById('stages').value);
+  const panE  = parseFloat(document.getElementById('pan-e').value);
+
+  const r = calcHydraulics(nps, sched, Qstd, sg, mw, mu, Z, T, P1, P2,
+                            eps, L, Leq, dz, gamma, cFac, cEff, dEff, marg, stg, panE);
+
+  // Flow regime display
+  const reg = regimeLabel(r.Re);
+  document.getElementById('regime-name').textContent = r.name || reg.name;
+  document.getElementById('regime-name').style.color = reg.color;
+  const rname = document.getElementById('regime-name');
+  rname.textContent = reg.name; rname.style.color = reg.color;
+  document.getElementById('re-display').textContent =
+    'Re = ' + r.Re.toFixed(0) + '   |   f = ' + r.f.toFixed(5);
+  document.getElementById('regime-marker').style.left = reg.pos + '%';
+
+  // Mach display
+  const machPct = Math.min(r.Ma * 100, 100);
+  document.getElementById('mach-display').textContent = 'Ma = ' + r.Ma.toFixed(4);
+  const mf = document.getElementById('mach-fill');
+  mf.style.width = machPct + '%';
+  mf.style.background = r.Ma > 0.3 ? '#e05040' : r.Ma > 0.2 ? '#e8a020' : '#60c060';
+
+  document.getElementById('result-area').style.display = '';
+
+  // Key outputs
+  document.getElementById('m-vel').textContent    = r.V.toFixed(2);
+  document.getElementById('m-ve').textContent     = r.Ve.toFixed(2);
+  const veratio = r.V / r.Ve;
+  const veEl = document.getElementById('m-veratio');
+  veEl.textContent = veratio.toFixed(3);
+  veEl.className = 'metric-val ' + (veratio > 1.0 ? 'red' : veratio > 0.8 ? 'amber' : 'accent');
+
+  document.getElementById('m-dpf').textContent    = r.dPf.toFixed(4);
+  document.getElementById('m-dpe').textContent    = r.dPe.toFixed(4);
+  document.getElementById('m-dpt').textContent    = r.dPt.toFixed(4);
+  document.getElementById('m-p2calc').textContent = r.P2_calc.toFixed(2);
+  document.getElementById('m-dpunit').textContent = r.dP_per_100.toFixed(2);
+  document.getElementById('m-ff').textContent     = r.f.toFixed(5);
+
+  // Compressor outputs
+  document.getElementById('m-cr').textContent     = r.cr.toFixed(3);
+  document.getElementById('m-hp').textContent     = r.Hp.toFixed(2);
+  document.getElementById('m-pgas').textContent   = r.P_gas.toFixed(1);
+  document.getElementById('m-pshaft').textContent = r.P_shaft.toFixed(1);
+  document.getElementById('m-pdrv').textContent   = r.P_driver.toFixed(1);
+  document.getElementById('m-drvspec').textContent= r.drvSpec.toFixed(0);
+
+  // Alerts
+  clearAlert('alert-vel'); clearAlert('alert-mach'); clearAlert('alert-dp');
+  if(veratio > 1.0) setAlert('alert-vel','err',
+    'Velocity exceeds erosional limit (V/Ve = '+veratio.toFixed(2)+'). Pipe diameter too small — select larger NPS.');
+  else if(veratio > 0.8) setAlert('alert-vel','warn',
+    'Velocity approaching erosional limit (V/Ve = '+veratio.toFixed(2)+'). Consider one size larger.');
+  else setAlert('alert-vel','ok',
+    'Velocity within erosional design envelope (V/Ve = '+veratio.toFixed(2)+').');
+
+  if(r.Ma > 0.3) setAlert('alert-mach','err',
+    'Mach number exceeds 0.3 design limit (Ma = '+r.Ma.toFixed(3)+'). Increase pipe diameter or reduce flow rate.');
+  else if(r.Ma > 0.2) setAlert('alert-mach','warn',
+    'Mach number approaching 0.3 limit (Ma = '+r.Ma.toFixed(3)+'). Monitor carefully.');
+
+  if(r.dP_per_100 > 100) setAlert('alert-dp','warn',
+    'ΔP/100m exceeds 100 mbar. High pressure drop — verify pipe sizing and consider larger diameter.');
+
+  // Sensitivity table
+  const tbody = document.getElementById('sens-body');
+  tbody.innerHTML = '';
+  NPS_LIST.forEach(n => {
+    if(!PIPE_DATA[sched][n]) return;
+    const sr = calcHydraulics(n, sched, Qstd, sg, mw, mu, Z, T, P1, P2,
+                              eps, L, Leq, dz, gamma, cFac, cEff, dEff, marg, stg, panE);
+    const isSelected = n === nps;
+    const vr = sr.V / sr.Ve;
+    let status = '', cls = '';
+    if(sr.Ma > 0.3)          { status = 'Mach exceeded'; cls = 'err'; }
+    else if(vr > 1.0)        { status = 'Erosion risk';  cls = 'err'; }
+    else if(vr > 0.8)        { status = 'Near erosional';cls = 'warn'; }
+    else if(sr.dP_per_100 > 100){ status = 'High ΔP';   cls = 'warn'; }
+    else                     { status = 'Acceptable';    cls = 'ok'; }
+
+    const tr = document.createElement('tr');
+    if(isSelected) tr.classList.add('selected');
+    tr.innerHTML = `
+      <td style="font-weight:${isSelected?'500':'400'}">${NPS_LABEL[n]}${isSelected?' ◀':''}</td>
+      <td class="num">${sr.D_mm.toFixed(1)}</td>
+      <td class="num">${sr.V.toFixed(2)}</td>
+      <td class="num">${sr.Ve.toFixed(2)}</td>
+      <td class="num ${vr>1?'err':vr>0.8?'warn':'ok'}">${vr.toFixed(3)}</td>
+      <td class="num ${sr.Ma>0.3?'err':sr.Ma>0.2?'warn':'ok'}">${sr.Ma.toFixed(4)}</td>
+      <td class="num">${sr.Re.toFixed(0)}</td>
+      <td class="num">${sr.f.toFixed(5)}</td>
+      <td class="num">${sr.dPf.toFixed(4)}</td>
+      <td class="num">${sr.drvSpec.toFixed(0)}</td>
+      <td class="${cls}">${status}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('metrics-area').style.display = '';
+}
+</script>
+</body>
+</html>
